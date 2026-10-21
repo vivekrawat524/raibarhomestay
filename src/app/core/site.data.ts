@@ -1,5 +1,5 @@
 const PHONE = '+918171176089';      // <-- put your real number here (keep the +91 format)
-const EMAIL = 'info@rebarhomestay.com';
+const EMAIL = 'negisuri010@gmail.com';
 const PLACE = 'Kainyur, Thalisain, Pauri Garhwal, Uttarakhand 246285';
 const WA = PHONE.replace(/\D/g, '');    // digits only, used for wa.me
 
@@ -21,8 +21,8 @@ export const SITE = {
 
 export interface Room { id: number; name: string; img: string; tags: string[]; price: number }
 export const ROOMS: Room[] = [
-  { id: 0, name: 'Valley Facing Room', img: 'images/p5.jpeg', price: 1000, tags: ['1 GUEST', 'BALCONY', 'SUNRISE VIEW', 'AC', 'WIFI', 'HOT WATER'] },
-  { id: 1, name: 'Garden Room', img: 'images/p6.png', price: 1000, tags: ['2 GUESTS', 'GARDEN SIT-OUT', 'MODERN', 'AC', 'WIFI', 'HOT WATER'] }
+  { id: 0, name: 'Valley Facing Room', img: 'images/p5.jpeg', price: 1000, tags: ['1 GUEST', 'BALCONY', 'SUNRISE VIEW',  'WIFI', 'HOT WATER'] },
+  { id: 1, name: 'Garden Room', img: 'images/p6.png', price: 1000, tags: ['2 GUESTS', 'GARDEN SIT-OUT', 'MODERN',  'WIFI', 'HOT WATER'] }
 ];
 
 export const HERO_SLIDES = ['images/p1.png', 'images/p4.png', 'images/p2.png', 'images/p3.png'];
