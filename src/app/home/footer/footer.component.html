@@ -1,0 +1,22 @@
+<footer class="box dark ft">
+  <div class="wrap">
+    <div class="fg">
+      <div>
+        <img class="flogo" src="images/p8.jpeg" alt="RAIBAR HOMESTAY logo">
+        <div class="lg">{{ site.name }}</div>
+        <p>A small Himalayan homestay where stillness is the offering and every stay is quietly transformative.</p>
+      </div>
+      <div><h4>NAVIGATE</h4>@for (x of links; track x) { <a routerLink="/" [fragment]="x">{{ x }}</a> }</div>
+      <div><h4>EXPLORE</h4>@for (t of trips; track t.id) { <a [routerLink]="['/trip', t.id]">{{ t.title }}</a> }</div>
+      <div><h4>GET IN TOUCH</h4>
+        <a class="ct" [href]="site.waLink" target="_blank" rel="noopener">📞 {{ site.phone }}</a>
+        <a class="ct" [href]="site.mailto">✉️ {{ site.email }}</a>
+        <a class="ct" [href]="site.mapLink" target="_blank" rel="noopener">📍 {{ site.address }}</a>
+      </div>
+    </div>
+    <div class="fb">
+      <div>© {{ year }} {{ site.name }}. All rights reserved.</div>
+      <span><a href="#">Privacy Policy</a><a href="#">Terms of Use</a><a href="#">Cancellation Policy</a></span>
+    </div>
+  </div>
+</footer>

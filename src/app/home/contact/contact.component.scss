@@ -1,0 +1,10 @@
+.c{text-align:center;.sh{justify-content:center;gap:16px}p{margin-bottom:26px;color:var(--mut)}}
+.actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.wa{background:#25d366;color:#fff}
+.ghost{background:transparent;border:2px solid var(--dk);color:var(--dk)}
+.ghost:hover{background:var(--dk);color:#fff}
+.follow{margin-top:38px;font-size:11px;letter-spacing:.2em;font-weight:700;color:var(--mut)}
+.social{display:flex;gap:14px;justify-content:center;margin-top:14px;
+  a{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--dk);color:var(--dk);transition:.25s;
+    &:hover{background:var(--dk);color:#fff;transform:translateY(-3px)}}
+  svg{width:22px;height:22px}}

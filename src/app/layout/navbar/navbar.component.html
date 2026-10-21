@@ -1,0 +1,36 @@
+<div class="pb" [style.width.%]="progress()"></div>
+
+<div class="mm" [class.open]="menuOpen()">
+  <a routerLink="/" fragment="home" (click)="close()">{{ l.t('HOME','होम') }}</a>
+  <a routerLink="/" fragment="rooms" (click)="close()">{{ l.t('ROOMS','कमरे') }}</a>
+  <a routerLink="/" fragment="gallery" (click)="close()">{{ l.t('GALLERY','गैलरी') }}</a>
+  <a routerLink="/" fragment="trips" (click)="close()">{{ l.t('TRIPS','यात्राएँ') }}</a>
+  <a routerLink="/" fragment="about" (click)="close()">{{ l.t('ABOUT','हमारे बारे में') }}</a>
+  <a routerLink="/" fragment="contact" (click)="close()">{{ l.t('CONTACT','संपर्क') }}</a>
+  <app-lang-switch />
+  <a class="btn" routerLink="/book" (click)="close()">{{ l.t('BOOK NOW →','अभी बुक करें →') }}</a>
+</div>
+
+<nav [class.compact]="compact()">
+  <div class="links left">
+    <a routerLink="/" fragment="home">{{ l.t('HOME','होम') }}</a>
+    <a routerLink="/" fragment="rooms">{{ l.t('ROOMS','कमरे') }}</a>
+    <a routerLink="/" fragment="gallery">{{ l.t('GALLERY','गैलरी') }}</a>
+    <a routerLink="/" fragment="trips">{{ l.t('TRIPS','यात्राएँ') }}</a>
+    <a routerLink="/" fragment="about">{{ l.t('ABOUT','हमारे बारे में') }}</a>
+  </div>
+
+  <a class="logo" routerLink="/" fragment="home">
+    <img src="images/p8.jpeg" alt="RAIBAR HOMESTAY logo">
+    <span class="name">{{ site.name }}</span>
+    <small>{{ site.tagline }}</small>
+  </a>
+
+  <div class="links right">
+    <a routerLink="/" fragment="contact">{{ l.t('CONTACT','संपर्क') }}</a>
+    <app-lang-switch />
+    <a class="btn" routerLink="/book">{{ l.t('BOOK NOW →','अभी बुक करें →') }}</a>
+  </div>
+
+  <button class="burger" aria-label="Menu" [attr.aria-expanded]="menuOpen()" (click)="toggle()"><i></i><i></i><i></i></button>
+</nav>

@@ -1,0 +1,25 @@
+.hero{height:calc(100vh - 32px);min-height:600px;color:#fff;background:#000}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s;&.on{opacity:1}
+  img{width:100%;height:100%;object-fit:cover}
+  &::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.2) 45%,rgba(0,0,0,.7))}}
+.content{position:absolute;z-index:10;left:0;right:0;bottom:14vh;
+  h1{font-size:clamp(40px,7.5vw,92px);max-width:1000px;margin:14px 0 28px}
+  .word{color:#d9b25a}}
+.dots{position:absolute;z-index:10;bottom:36px;left:50%;transform:translateX(-50%);display:flex;gap:10px;
+  i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:.3s;&.on{background:var(--gold);width:28px;border-radius:10px}}}
+  
+/* ===== entrance animations ===== */
+/* slow zoom-out on the photo that is showing */
+.slide.on img{animation:kenburns 8s ease-out both}
+@keyframes kenburns{from{transform:scale(1.1)}to{transform:scale(1)}}
+
+/* text rises in one piece after another ("backwards" = wait invisible, then leave hover effects alone) */
+.content .eye,.content h1,.content .cta{animation:fadeUp .9s cubic-bezier(.2,.7,.2,1) backwards}
+.content .eye{animation-delay:.1s}
+.content h1{animation-delay:.25s}
+.content .cta{animation-delay:.45s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
+
+/* the gold word pops in again every time it changes */
+.word{display:inline-block;animation:wordIn .6s cubic-bezier(.2,.7,.2,1) backwards}
+@keyframes wordIn{from{opacity:0;transform:translateY(.4em)}to{opacity:1;transform:none}}

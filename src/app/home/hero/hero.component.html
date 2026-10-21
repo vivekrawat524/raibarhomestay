@@ -1,0 +1,19 @@
+<header class="box hero" id="home">
+  @for (s of slides; track s; let i = $index) {
+    <div class="slide" [class.on]="active() === i"><img [src]="s" alt="Raibar Homestay"></div>
+  }
+
+  <div class="wrap content">
+    <div class="eye">PAURI GARHWAL, UTTARAKHAND</div>
+    @if (l.lang() === 'en') {
+      <h1>@for (w of [words[active()]]; track w) { <span class="word">{{ w }}</span> } the heart of {{ site.name }}</h1>
+    } @else {
+      <h1>रैबार होमस्टे के दिल को जानिए</h1>
+    }
+    <a class="cta" routerLink="/book">{{ l.t('RESERVE YOUR STAY →','अपना स्टे बुक करें →') }}</a>
+  </div>
+
+  <div class="dots">
+    @for (s of slides; track s; let i = $index) { <i [class.on]="active() === i" (click)="active.set(i)"></i> }
+  </div>
+</header>

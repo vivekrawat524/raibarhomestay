@@ -1,0 +1,24 @@
+<section class="box light" id="contact">
+  <div class="wrap c">
+    <div class="sh"><div class="k">{{ l.t('RAIBAR HOMESTAY · PAURI GARHWAL','रैबार होमस्टे · पौड़ी गढ़वाल') }}</div><app-lang-switch /></div>
+    <h2>{{ l.t('Come as you are. Leave as you ought to be.','जैसे हैं वैसे आइए। जैसा होना चाहिए वैसे लौटिए।') }}</h2>
+    <p>{{ l.t('Rooms available year-round · Pauri Garhwal, Uttarakhand','पूरे साल कमरे उपलब्ध · पौड़ी गढ़वाल, उत्तराखंड') }}</p>
+
+    <a class="cta" routerLink="/book">{{ l.t('RESERVE YOUR STAY →','अपना स्टे बुक करें →') }}</a>
+
+    <div class="actions">
+      <a class="cta wa" [href]="site.waLink" target="_blank" rel="noopener">💬 {{ site.phone }} · {{ l.t('CHAT ON WHATSAPP','व्हाट्सएप पर चैट करें') }}</a>
+      <a class="cta ghost" [href]="site.mailto">✉️ {{ site.email }}</a>
+    </div>
+
+    <div class="follow">{{ l.t('FOLLOW US','हमें फ़ॉलो करें') }}</div>
+    <div class="social">
+      <a [href]="site.instagram" target="_blank" rel="noopener" aria-label="RAIBAR HOMESTAY on Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a [href]="site.facebook" target="_blank" rel="noopener" aria-label="RAIBAR HOMESTAY on Facebook">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      </a>
+    </div>
+  </div>
+</section>

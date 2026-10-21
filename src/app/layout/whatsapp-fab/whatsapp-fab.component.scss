@@ -1,0 +1,14 @@
+/* position:fixed = it stays in the corner while you scroll */
+.fab{
+  position:fixed;right:24px;bottom:24px;z-index:150;
+  width:62px;height:62px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#25d366;color:#fff;
+  box-shadow:0 8px 24px rgba(0,0,0,.28);
+  transition:transform .25s;
+}
+.fab:hover{transform:scale(1.08)}
+.fab::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid #25d366;animation:pulse 2.2s infinite}
+svg{width:34px;height:34px}
+@keyframes pulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
+@media(max-width:900px){.fab{right:16px;bottom:16px;width:56px;height:56px}}

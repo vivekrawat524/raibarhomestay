@@ -1,0 +1,22 @@
+<section class="box light" id="rooms">
+  <div class="wrap">
+    <div class="sh"><div class="k">{{ l.t('ROOMS','कमरे') }}</div><app-lang-switch /></div>
+    <h2>{{ l.t('Two rooms that breathe with the landscape','पहाड़ी नज़ारों के साथ दो कमरे') }}</h2>
+    <div class="rooms">
+      @for (r of rooms; track r.id) {
+        <div class="room">
+          <div class="ph"><img [src]="r.img" [alt]="r.name"></div>
+          <div class="rb">
+            <h3>{{ r.name }}</h3>
+            <div class="tags">@for (t of r.tags; track t) { <span>{{ t }}</span> }</div>
+            <div class="pr">
+              <div><b>₹{{ r.price.toLocaleString('en-IN') }}</b><small>{{ l.t('per night','प्रति रात') }}</small></div>
+              <a routerLink="/book" [queryParams]="{ room: r.id }">{{ l.t('BOOK','बुक करें') }}</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+    <p class="note">{{ l.t('Food is not included. You pay extra for meals.','खाना शामिल नहीं है। भोजन का अलग से भुगतान करना होगा।') }}</p>
+  </div>
+</section>

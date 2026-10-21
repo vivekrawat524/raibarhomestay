@@ -1,0 +1,73 @@
+<section class="box rev" id="reviews">
+  <div class="wrap">
+    <div class="sh"><div class="k">{{ l.t('GUEST REVIEWS','मेहमानों की राय') }}</div><app-lang-switch /></div>
+    <h2>{{ l.t('What our guests say','हमारे मेहमान क्या कहते हैं') }}</h2>
+
+    <div class="rv">
+
+      <!-- LEFT: summary + review cards -->
+      <div>
+        <div class="sum">
+          <div class="big">
+            <b>{{ svc.count() ? svc.average().toFixed(1) : '–' }}</b>
+            <div class="stars">@for (s of stars; track s) { <span class="st" [class.on]="s <= avgStars()">★</span> }</div>
+            <small>{{ svc.count() }} {{ svc.count() === 1 ? l.t('review','समीक्षा') : l.t('reviews','समीक्षाएँ') }}</small>
+          </div>
+          <div class="bars">
+            @for (b of bars(); track b.n) {
+              <div class="bar"><span>{{ b.n }}★</span><i><u [style.width.%]="b.pct"></u></i><span>{{ b.c }}</span></div>
+            }
+          </div>
+        </div>
+
+        <div class="list">
+          @for (r of svc.reviews(); track r.id) {
+            <article class="card">
+              <div class="top">
+                <span class="av">{{ initial(r.name) }}</span>
+                <div class="who"><b>{{ r.name }}</b><small>{{ r.stay }} · {{ fmt(r.date) }}@if (r.mine) { · {{ l.t('Your review','आपकी समीक्षा') }} }</small></div>
+                <div class="stars sm">@for (s of stars; track s) { <span class="st" [class.on]="s <= r.rating">★</span> }</div>
+              </div>
+              <p>{{ r.text }}</p>
+            </article>
+          } @empty {
+            <div class="empty">{{ l.t('No reviews yet. Be the first to share your experience!','अभी कोई समीक्षा नहीं है। अपना अनुभव साझा करने वाले पहले व्यक्ति बनें!') }}</div>
+          }
+        </div>
+      </div>
+
+      <!-- RIGHT: write a review -->
+      <div class="form">
+        <div class="k">{{ l.t('WRITE A REVIEW','अपनी समीक्षा लिखें') }}</div>
+        <h3>{{ l.t('How was your stay?','आपका अनुभव कैसा रहा?') }}</h3>
+
+        <label>{{ l.t('YOUR RATING','आपकी रेटिंग') }}</label>
+        <div class="pick" role="radiogroup" [attr.aria-label]="l.t('Your rating','आपकी रेटिंग')" (mouseleave)="hover.set(0)">
+          @for (s of stars; track s) {
+            <button type="button" class="st" role="radio" [attr.aria-checked]="rating() === s" [attr.aria-label]="s + ' star'"
+              [class.on]="s <= (hover() || rating())" (mouseenter)="hover.set(s)" (click)="rating.set(s)">★</button>
+          }
+          <span class="rt">{{ ratingText(hover() || rating()) }}</span>
+        </div>
+
+        <label>{{ l.t('YOUR NAME','आपका नाम') }}</label>
+        <input class="in" maxlength="60" [placeholder]="l.t('e.g. Rahul Sharma','जैसे: राहुल शर्मा')" [(ngModel)]="f.name">
+
+        <label>{{ l.t('WHAT DID YOU DO?','आपने क्या किया?') }}</label>
+        <select class="in" [(ngModel)]="f.stay">
+          <option value="Homestay stay">{{ l.t('Homestay stay','होमस्टे में ठहराव') }}</option>
+          <option value="Temple trip">{{ l.t('Temple trip','मंदिर यात्रा') }}</option>
+          <option value="Day visit">{{ l.t('Day visit','एक दिन की यात्रा') }}</option>
+        </select>
+
+        <label>{{ l.t('YOUR REVIEW','आपकी समीक्षा') }}</label>
+        <textarea class="in" maxlength="600" [placeholder]="l.t('Tell us about the rooms, food, hosts, views…','कमरे, खाना, मेज़बानी, नज़ारों के बारे में बताइए…')" [(ngModel)]="f.text"></textarea>
+
+        <a class="cta" (click)="submit()">{{ l.t('SUBMIT REVIEW →','समीक्षा भेजें →') }}</a>
+        @if (error()) { <p class="err">{{ error() }}</p> }
+        @if (done()) { <div class="msg">{{ l.t('Thank you! Your review has been received.','धन्यवाद! आपकी समीक्षा हमें मिल गई है।') }}</div> }
+      </div>
+
+    </div>
+  </div>
+</section>

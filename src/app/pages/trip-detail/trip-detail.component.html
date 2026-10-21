@@ -1,0 +1,70 @@
+@if (trip) {
+<div class="page">
+
+  <div class="box dark photo">
+    <img class="hbg" [src]="trip.img" alt="">
+    <div class="bh">
+      <div class="sh"><a class="back" routerLink="/" fragment="trips">{{ l.t('← BACK','← वापस') }}</a><app-lang-switch /></div>
+      <div class="eye">{{ l.t(trip.days + ' DAYS · ' + count + ' TEMPLES', trip.daysHi + ' · ' + count + ' मंदिर') }}</div>
+      <h1>{{ l.t(trip.title, trip.titleHi) }}</h1>
+      <p>{{ l.t(trip.desc, trip.descHi) }}</p>
+      <div class="tags"><span>BY ROAD</span>@if (trip.optionNote) { <span>10 KM TREK OPTION</span> }<span>₹{{ trip.price.toLocaleString('en-IN') }} PER PERSON</span></div>
+    </div>
+  </div>
+
+  <div class="box light pad-s">
+    <div class="steps">
+      <div><b>01</b>Send Enquiry<small>Choose your start date and group size</small></div>
+      <div><b>02</b>We Confirm<small>Driver, route and dates confirmed</small></div>
+      <div><b>03</b>Pay &amp; Travel<small>Pay via link and start your journey</small></div>
+    </div>
+
+    <div class="bg">
+      <div class="bf">
+        <div class="k">{{ l.t('TEMPLES INCLUDED','शामिल मंदिर') }}</div>
+        @for (key of trip.fixed; track key) {
+          <div class="stop">
+            <img [src]="temples[key].img" [alt]="temples[key].name">
+            <div><b>{{ l.t(temples[key].name, temples[key].nameHi) }}</b><p>{{ l.t(temples[key].desc, temples[key].descHi) }}</p></div>
+          </div>
+        }
+
+        @if (trip.options.length) {
+          <div class="k choice-k">{{ trip.options.length > 1 ? l.t('OPTIONAL: CHOOSE ONE OR BOTH','वैकल्पिक: एक या दोनों चुनें') : l.t('OPTIONAL ADD-ON','वैकल्पिक अतिरिक्त मंदिर') }}</div>
+          @if (trip.optionNote) {
+            <div class="trek">🥾 <span>{{ l.t(trip.optionNote, trip.optionNoteHi) }}</span></div>
+          }
+          @for (key of trip.options; track key) {
+            <label class="opt" [class.on]="picked[key]">
+              <input type="checkbox" [(ngModel)]="picked[key]">
+              <img [src]="temples[key].img" [alt]="temples[key].name">
+              <div><b>{{ l.t(temples[key].name, temples[key].nameHi) }}</b><p>{{ l.t(temples[key].desc, temples[key].descHi) }}</p></div>
+            </label>
+          }
+        }
+
+        <div class="k enq">{{ l.t('BOOK THIS TRIP','यह यात्रा बुक करें') }}</div>
+        <div class="row two">
+          <div><label>START DATE</label><input type="date" class="in" [(ngModel)]="f.date"></div>
+          <div><label>TRAVELLERS</label><input type="number" min="1" max="12" class="in" [(ngModel)]="f.travellers"></div>
+          <div><label>FULL NAME</label><input class="in" [(ngModel)]="f.name"></div>
+          <div><label>PHONE / WHATSAPP</label><input type="tel" class="in" [(ngModel)]="f.phone"></div>
+        </div>
+        <div class="tot">Total: ₹{{ total.toLocaleString('en-IN') }}</div>
+        <a class="cta" (click)="submit()">SEND TRIP ENQUIRY →</a>
+        @if (sent) { <div class="msg">Thank you! We'll get back to you shortly.</div> }
+      </div>
+
+      <aside class="bs">
+        <h4>PRICE</h4><div class="pl"><span>Per person</span><b>₹{{ trip.price.toLocaleString('en-IN') }}</b></div>
+        <h4>ALWAYS INCLUDED</h4><ul>@for (key of trip.fixed; track key) { <li>{{ temples[key].name }}</li> }</ul>
+        @if (trip.options.length) {
+          <h4>YOUR OPTIONAL TEMPLES</h4>
+          <ul>@for (k of chosen; track k) { <li>{{ temples[k].name }}</li> } @empty { <li>None selected</li> }</ul>
+        }
+        <h4>HELP</h4><ul><li><a [href]="site.waLink" target="_blank" rel="noopener">{{ site.phone }}</a></li><li><a [href]="site.waLink" target="_blank" rel="noopener">WhatsApp Us</a></li></ul>
+      </aside>
+    </div>
+  </div>
+</div>
+}

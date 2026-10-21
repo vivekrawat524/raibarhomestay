@@ -1,0 +1,31 @@
+<section class="box dark" id="location">
+  <div class="wrap loc">
+    <div>
+      <div class="sh"><div class="k">{{ l.t('LOCATION','स्थान') }}</div><app-lang-switch /></div>
+      <h2>{{ l.t('Find us in the hills of Kainyur','कैन्यूर की पहाड़ियों में हमें ढूँढिए') }}</h2>
+
+      <ul class="det">
+        <li>
+          <span class="ic">📍</span>
+          <div>{{ l.t('Village Kainyur, near Thalisain Block','गाँव कैन्यूर, थलीसैंण ब्लॉक के पास') }}<br>
+               {{ l.t('Pauri Garhwal, Uttarakhand 246285','पौड़ी गढ़वाल, उत्तराखंड 246285') }}</div>
+        </li>
+        <li>
+          <span class="ic">📞</span>
+          <div><a [href]="site.waLink" target="_blank" rel="noopener">{{ site.phone }}</a>
+               <a class="wa" [href]="site.waLink" target="_blank" rel="noopener">{{ l.t('Chat on WhatsApp','व्हाट्सएप पर चैट करें') }}</a></div>
+        </li>
+        <li>
+          <span class="ic">✉️</span>
+          <div><a [href]="site.mailto">{{ site.email }}</a></div>
+        </li>
+      </ul>
+
+      <a class="cta" [href]="site.directions" target="_blank" rel="noopener">{{ l.t('GET DIRECTIONS →','रास्ता देखें →') }}</a>
+    </div>
+
+    <div class="map">
+      <iframe [src]="map" title="RAIBAR HOMESTAY location map" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </div>
+</section>

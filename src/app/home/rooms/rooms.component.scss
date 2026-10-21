@@ -1,0 +1,9 @@
+.rooms{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.room{background:#fff;border-radius:22px;overflow:hidden;border:1px solid var(--line)}
+.ph{aspect-ratio:4/3;overflow:hidden;img{width:100%;height:100%;object-fit:cover;transition:transform .6s}}
+.room:hover img{transform:scale(1.06)}
+.rb{padding:22px;h3{font-size:30px}}
+.pr{display:flex;justify-content:space-between;align-items:center;margin-top:12px;b{font:600 32px 'Cormorant Garamond',serif;margin-right:8px}small{color:var(--mut)}
+  a{background:var(--dk);color:#fff;padding:9px 22px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:.1em;&:hover{background:var(--gold);color:#111}}}
+.note{margin-top:22px;color:var(--mut);font-size:14px}
+@media(max-width:900px){.rooms{grid-template-columns:1fr}}

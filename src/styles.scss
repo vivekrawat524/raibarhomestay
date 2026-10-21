@@ -1,1 +1,56 @@
-/* You can add global styles to this file, and also import other style files */
+:root{--bg:#ffffff;--ink:#1c2a22;--mut:#6d7a70;--dk:#14201a;--gold:#c9a24b;--cream:#f4efe4;--line:rgba(120,120,120,.25)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+h1,h2{font-family:'DM Sans',sans-serif;font-weight:700;line-height:1.12;letter-spacing:-.01em}
+h3{font-family:'Cormorant Garamond',serif;font-weight:600;line-height:1.1}
+h2{font-size:clamp(30px,4.5vw,50px);margin-bottom:24px}
+
+/* ===== BOX: every section is a rounded card on a white page ===== */
+.box{margin:16px;border-radius:32px;overflow:hidden;position:relative;scroll-margin-top:96px}
+.box.dark{background:var(--dk);color:#f3efe6}
+.box.dark p{color:rgba(255,255,255,.78)}
+.box.light{background:var(--cream)}
+section.box{padding:96px 0}
+.box.pad-s{padding:40px 0 56px}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.k,.eye{letter-spacing:.2em;font-size:12px;color:var(--gold);font-weight:700}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.btn,.cta{display:inline-block;background:var(--gold);color:#111;padding:12px 24px;border-radius:999px;font-weight:700;font-size:13px;letter-spacing:.08em;cursor:pointer;border:0;transition:.25s;&:hover{filter:brightness(1.1);transform:translateY(-2px)}}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;span{font-size:11px;letter-spacing:.08em;border:1px solid var(--line);padding:3px 10px;border-radius:999px}}
+label{display:block;font-size:11px;letter-spacing:.14em;font-weight:700;margin:16px 0 6px}
+.in{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
+textarea.in{min-height:90px}
+
+/* ===== Inner pages (booking, trip detail): space for the fixed navbar ===== */
+.page{padding-top:110px}
+.bh{max-width:1200px;margin:0 auto;padding:48px 24px;h1{font-size:clamp(32px,5vw,56px);margin:10px 0}}
+.back{font-weight:700;letter-spacing:.08em;font-size:13px;cursor:pointer}
+.steps{max-width:1200px;margin:0 auto 30px;padding:0 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+  div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column}
+  b{color:var(--gold);font-size:22px}small{color:var(--mut)}}
+.bg{max-width:1200px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start}
+.bf{background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px}
+.bs{background:var(--dk);color:#eee;border-radius:22px;padding:24px;h4{color:var(--gold);letter-spacing:.14em;font-size:12px;margin:18px 0 8px}ul{list-style:none;font-size:14px;li{padding:2px 0}}.pl{display:flex;justify-content:space-between;font-size:14px;gap:8px}}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;&.two{grid-template-columns:1fr 1fr}}
+.tot{margin:20px 0;font-weight:700;font-size:18px}
+.msg{margin-top:14px;padding:12px;border-radius:10px;background:#e6f4ea;color:#14532d}
+@media(max-width:900px){.bg,.steps,.row,.row.two{grid-template-columns:1fr}section.box{padding:64px 0}.box{margin:10px;border-radius:24px}}
+
+/* ===== Header box with a photo behind the text (booking + trip pages) ===== */
+.box.photo>.hbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.box.photo::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(14,22,18,.9),rgba(14,22,18,.5))}
+.box.photo .bh{position:relative;z-index:2}
+
+/* ===== Animations ===== */
+/* every new page fades in */
+router-outlet + *{display:block;animation:pageIn .5s ease backwards}
+@keyframes pageIn{from{opacity:0}}
+
+/* respect people who switch animations off in their device settings */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+}

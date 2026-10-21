@@ -1,0 +1,12 @@
+<section class="box dark" id="gallery">
+  <div class="wrap">
+    <div class="sh"><div class="k">{{ l.t('GALLERY','गैलरी') }}</div><app-lang-switch /></div>
+    <h2>{{ l.t('Life inside RAIBAR HOMESTAY','रैबार होमस्टे का जीवन') }}</h2>
+    <div class="gal">
+      @for (g of items; track g.src; let i = $index) {
+        <div [class]="'g' + (i + 1)" (click)="open = g.src"><img [src]="g.src" [alt]="g.alt"></div>
+      }
+    </div>
+  </div>
+  @if (open) { <div class="lb" (click)="open = null"><img [src]="open" alt="Gallery photo"></div> }
+</section>

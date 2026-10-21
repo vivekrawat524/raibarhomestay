@@ -1,0 +1,76 @@
+<div class="page">
+  <div class="box dark photo">
+  <img class="hbg" [src]="room.img" alt="">
+  <div class="bh">
+    <div class="sh"><a class="back" routerLink="/">{{ l.t('← BACK TO HOME','← होम पर वापस') }}</a><app-lang-switch /></div>
+    <div class="eye">RAIBAR HOMESTAY · PAURI GARHWAL</div>
+    <h1>{{ l.t('Book Your Stay at RAIBAR HOMESTAY, Pauri Garhwal','रैबार होमस्टे, पौड़ी गढ़वाल में अपना स्टे बुक करें') }}</h1>
+    <p>{{ l.t("Reserve your stay. Fill in the form and we'll confirm availability within a few hours.",'अपना स्टे बुक करें। फ़ॉर्म भरें, हम कुछ घंटों में उपलब्धता की पुष्टि करेंगे।') }}</p>
+      </div>
+  </div>
+
+  <div class="box light pad-s">
+  <div class="steps">
+    <div><b>01</b>Submit Request<small>Fill in your dates and preferences below</small></div>
+    <div><b>02</b>We Confirm<small>Availability confirmed within 4-6 hours</small></div>
+    <div><b>03</b>Pay &amp; Arrive<small>Secure your stay with a payment link</small></div>
+  </div>
+
+  <div class="bg">
+    <div class="bf">
+      <div class="k">BOOKING REQUEST</div>
+      <h2>{{ l.t('Tell us about your stay','अपने स्टे के बारे में बताइए') }}</h2>
+      <p class="intro">This is a booking enquiry, not an instant reservation. We'll confirm availability and send a payment link within a few hours.</p>
+
+      <div class="row">
+        <div><label>{{ l.t('CHECK-IN','चेक-इन') }}</label><input type="date" class="in" [min]="today" [(ngModel)]="f.checkIn"></div>
+        <div><label>{{ l.t('CHECK-OUT','चेक-आउट') }}</label><input type="date" class="in" [min]="f.checkIn || today" [(ngModel)]="f.checkOut"></div>
+        <div><label>{{ l.t('GUESTS','मेहमान') }}</label>
+          <select class="in" [(ngModel)]="f.guests">@for (g of ['1 Guest','2 Guests','3 Guests','4 Guests']; track g) { <option>{{ g }}</option> }</select></div>
+      </div>
+
+      <label>{{ l.t('CHOOSE YOUR ROOM','अपना कमरा चुनें') }}</label>
+      <div class="rpick">
+        <div class="rbig"><img [src]="room.img" [alt]="room.name"><div class="rcap"><b>{{ room.name }}</b><span>₹{{ room.price.toLocaleString('en-IN') }} /night</span></div></div>
+        <div class="rlist">
+          @for (r of rooms; track r.id) {
+            <div class="rc" [class.sel]="selected === r.id" (click)="selected = r.id">
+              <div class="th"><img [src]="r.img" alt=""></div>
+              <div class="t"><b>{{ r.name }}</b><div class="rt">@for (t of r.tags.slice(0,4); track t) { <span>{{ t }}</span> }</div></div>
+              <span class="pc">₹{{ r.price.toLocaleString('en-IN') }} <small>/night</small></span>
+              <span class="ck">✓</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="row two">
+        <div><label>{{ l.t('FULL NAME','पूरा नाम') }}</label><input class="in" placeholder="Your name" [(ngModel)]="f.name"></div>
+        <div><label>{{ l.t('EMAIL','ईमेल') }}</label><input type="email" class="in" placeholder="you@example.com" [(ngModel)]="f.email"></div>
+      </div>
+      <div class="row two"><div><label>{{ l.t('PHONE / WHATSAPP','फ़ोन / व्हाट्सएप') }}</label><input type="tel" class="in" placeholder="+91 00000 00000" [(ngModel)]="f.phone"></div></div>
+
+      <label>ANYTHING ELSE WE SHOULD KNOW? <i>(optional)</i></label>
+      <textarea class="in" placeholder="Special requests, dietary needs, occasion…" [(ngModel)]="f.note"></textarea>
+
+      <div class="tot">
+        @if (nights > 0) { {{ nights }} night(s) × ₹{{ room.price.toLocaleString('en-IN') }} = ₹{{ total.toLocaleString('en-IN') }} <small>(food extra)</small> }
+        @else { Select your dates to see the total }
+      </div>
+      <a class="cta" (click)="submit()">{{ l.t('SEND BOOKING REQUEST →','बुकिंग रिक्वेस्ट भेजें →') }}</a>
+      @if (error) { <p class="err">{{ error }}</p> }
+      @if (sent) { <div class="msg">Thank you! Your request is on its way. We'll confirm shortly.</div> }
+    </div>
+
+    <aside class="bs">
+      <h4>OUR ROOMS</h4>
+      @for (r of rooms; track r.id) { <div class="pl"><b>{{ r.name }}</b><b>₹{{ r.price.toLocaleString('en-IN') }} /night</b></div> }
+      <h4>WHAT'S INCLUDED</h4>
+      <ul><li>Air conditioning</li><li>High-speed Wi-Fi</li><li>Hot water</li><li>Garden and property access</li><li>Local area guidance</li></ul>
+      <h4>FOOD</h4><ul><li>Food is not included. You pay extra for meals.</li></ul>
+      <h4>CHECK-IN / CHECK-OUT</h4><ul><li>Check-in from <b>12:00 PM</b></li><li>Check-out by <b>11:00 AM</b></li></ul>
+      <h4>HELP</h4><ul><li><a [href]="site.waLink" target="_blank" rel="noopener">{{ site.phone }}</a></li><li><a [href]="site.waLink" target="_blank" rel="noopener">WhatsApp Us</a></li></ul>
+      </aside>
+  </div>
+  </div>
+</div>

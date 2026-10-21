@@ -1,0 +1,27 @@
+<section class="box light" id="trips">
+  <div class="wrap">
+    <div class="sh"><div class="k">{{ l.t('TRAVEL PACKAGES','ट्रैवल पैकेज') }}</div><app-lang-switch /></div>
+    <h2>{{ l.t('Explore the temples of Garhwal','गढ़वाल के मंदिरों की यात्रा करें') }}</h2>
+    <div class="tg">
+      @for (t of trips; track t.id) {
+        <div class="tc">
+          <div class="ph"><img [src]="t.img" [alt]="t.title"><em>{{ l.t(t.days + ' DAYS', t.daysHi) }}</em></div>
+          <div class="rb">
+            <h3>{{ l.t(t.title, t.titleHi) }}</h3>
+            <p>{{ l.t(t.desc, t.descHi) }}</p>
+            <div class="tags">
+  <span>{{ l.t(count(t) + ' TEMPLES', count(t) + ' मंदिर') }}</span>
+ @if (t.optionNote) { <span>{{ l.t('+ 10 KM TREK OPTION','+ 10 किमी ट्रैक विकल्प') }}</span> }
+              @else if (hasOption(t)) { <span>{{ l.t('+ OPTION','+ विकल्प') }}</span> }
+  <span>{{ l.t('BY ROAD','सड़क मार्ग') }}</span>
+</div>
+            <div class="tp">
+              <div><b>₹{{ t.price.toLocaleString('en-IN') }}</b><small>{{ l.t('per person','प्रति व्यक्ति') }}</small></div>
+              <a class="tb" [routerLink]="['/trip', t.id]">{{ l.t('VIEW & BOOK','देखें और बुक करें') }}</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
