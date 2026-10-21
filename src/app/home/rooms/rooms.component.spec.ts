@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { RoomsComponent } from './rooms.component';
 
@@ -8,7 +9,8 @@ describe('RoomsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RoomsComponent]
+      imports: [RoomsComponent],
+      providers: [provideRouter([])]
     })
     .compileComponents();
 
