@@ -1,0 +1,117 @@
+<section class="rm">
+  <div class="head">
+    <div>
+      <h2>Rooms Management ({{ data.rooms().length }} Rooms)</h2>
+      <p class="sub">Edit nightly prices, room descriptions, photos, amenities, or block dates for maintenance.</p>
+    </div>
+    <button class="btn" type="button" (click)="showEditor() ? showEditor.set(false) : openNewRoom()">
+      {{ showEditor() ? '✕ Close Editor' : '+ Add New Room' }}
+    </button>
+  </div>
+
+  @if (feedback(); as fb) {
+    <p class="msg-bar" [class.err]="fb.isError">{{ fb.text }}</p>
+  }
+
+  <!-- Add / Edit Room Form -->
+  @if (showEditor()) {
+    <form class="editor-card" (ngSubmit)="saveRoom()">
+      <h3>{{ editingId() ? 'Edit Room #' + editingId() : 'Add New Room' }}</h3>
+
+      <div class="grid-3">
+        <div>
+          <label for="rName">ROOM NAME *</label>
+          <input id="rName" class="in" name="name" [(ngModel)]="form.name" placeholder="e.g. Valley Facing Room" required>
+        </div>
+        <div>
+          <label for="rPrice">NIGHTLY PRICE (₹) *</label>
+          <input id="rPrice" class="in" type="number" min="100" name="price" [(ngModel)]="form.price" required>
+        </div>
+        <div>
+          <label for="rCap">MAX GUESTS</label>
+          <input id="rCap" class="in" type="number" min="1" max="10" name="capacity" [(ngModel)]="form.capacity">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <label for="rImg">IMAGE PATH / URL</label>
+          <input id="rImg" class="in" name="img" [(ngModel)]="form.img" placeholder="images/p5.jpeg">
+        </div>
+        <div>
+          <label for="rTags">AMENITIES / TAGS (COMMA SEPARATED)</label>
+          <input id="rTags" class="in" name="tagsText" [(ngModel)]="form.tagsText" placeholder="2 GUESTS, BALCONY, WIFI">
+        </div>
+      </div>
+
+      <div>
+        <label for="rDesc">DESCRIPTION</label>
+        <textarea id="rDesc" class="in" name="desc" [(ngModel)]="form.desc" placeholder="Short description of the room view and comforts..."></textarea>
+      </div>
+
+      <div class="form-foot">
+        <button class="btn" type="submit">{{ editingId() ? 'Update Room' : 'Create Room' }}</button>
+      </div>
+    </form>
+  }
+
+  <!-- Rooms Grid -->
+  <div class="room-grid">
+    @for (r of data.rooms(); track r.id) {
+      <article class="room-card" [class.inactive]="!r.active">
+        <div class="photo-wrap">
+          <img [src]="r.img" [alt]="r.name">
+          <span class="status-pill" [class.off]="!r.active">{{ r.active ? 'Active' : 'Hidden' }}</span>
+        </div>
+
+        <div class="body">
+          <div class="title-row">
+            <div>
+              <h3>{{ r.name }}</h3>
+              <small>Up to {{ r.capacity }} guests · Whole room</small>
+            </div>
+            <strong class="price">₹{{ r.price }}<small>/night</small></strong>
+          </div>
+
+          <p class="desc">{{ r.desc }}</p>
+
+          <div class="tags">
+            @for (t of r.tags; track t) {
+              <span>{{ t }}</span>
+            }
+          </div>
+
+          <div class="card-actions">
+            <button class="act edit" type="button" (click)="openEditRoom(r)">✏️ Edit Details</button>
+            <button class="act toggle" type="button" (click)="toggleActive(r)">
+              {{ r.active ? 'Hide Room' : 'Activate Room' }}
+            </button>
+          </div>
+
+          <!-- Blocked Dates Section -->
+          <div class="blocks">
+            <h4>Blocked Dates ({{ r.blockedDates.length }})</h4>
+
+            @if (r.blockedDates.length > 0) {
+              <ul class="block-list">
+                @for (bl of r.blockedDates; track bl.id) {
+                  <li>
+                    <span><strong>{{ bl.from }} → {{ bl.to }}</strong> ({{ bl.reason }})</span>
+                    <button type="button" (click)="removeBlock(r.id, bl.id)">Remove</button>
+                  </li>
+                }
+              </ul>
+            }
+
+            <div class="block-form">
+              <input class="in" type="date" [(ngModel)]="blockFormFor(r.id).from" aria-label="Block from date">
+              <input class="in" type="date" [(ngModel)]="blockFormFor(r.id).to" aria-label="Block to date">
+              <input class="in" type="text" [(ngModel)]="blockFormFor(r.id).reason" placeholder="Reason">
+              <button class="act block-btn" type="button" (click)="addBlock(r.id)">Block</button>
+            </div>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</section>

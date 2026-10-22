@@ -1,5 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { AdminBooking, AdminRoom, BookingStatus, countNights, datesOverlap } from './admin.models';
+import { AdminBooking, AdminRoom, BlockedRange, BookingStatus, countNights, datesOverlap } from './admin.models';
 import { SEED_ROOMS, buildSeedBookings, dayOffset } from './admin.seed';
 
 const ROOMS_KEY = 'raibar-admin-rooms-v1';
@@ -147,6 +147,90 @@ export class AdminDataService {
     this.bookings.update(list => [booking, ...list]);
     this.saveBookings();
     return { ok: true, booking };
+  }
+
+  /** Add a new room or update an existing room */
+  saveRoom(roomData: Omit<AdminRoom, 'id' | 'blockedDates'> & { id?: number }): AdminRoom {
+    if (roomData.id) {
+      let updated!: AdminRoom;
+      this.rooms.update(list =>
+        list.map(r => {
+          if (r.id === roomData.id) {
+            updated = { ...r, ...roomData, id: r.id };
+            return updated;
+          }
+          return r;
+        })
+      );
+      this.saveRooms();
+      return updated;
+    }
+
+    const nextId = this.rooms().reduce((max, r) => Math.max(max, r.id), 0) + 1;
+    const created: AdminRoom = {
+      ...roomData,
+      id: nextId,
+      blockedDates: []
+    };
+    this.rooms.update(list => [...list, created]);
+    this.saveRooms();
+    return created;
+  }
+
+  /** Activate or deactivate a room */
+  toggleRoomActive(roomId: number) {
+    this.rooms.update(list =>
+      list.map(r => (r.id === roomId ? { ...r, active: !r.active } : r))
+    );
+    this.saveRooms();
+  }
+
+  /** Block dates on a room for maintenance or personal use */
+  addBlockedRange(
+    roomId: number,
+    from: string,
+    to: string,
+    reason: string
+  ): { ok: boolean; error?: string } {
+    if (!from || !to || to <= from) {
+      return { ok: false, error: 'End date must be after start date.' };
+    }
+    const hasGuestBooking = this.bookings().some(
+      b =>
+        b.roomId === roomId &&
+        ACTIVE_STATUSES.includes(b.status) &&
+        datesOverlap(from, to, b.checkIn, b.checkOut)
+    );
+    if (hasGuestBooking) {
+      return { ok: false, error: 'Cannot block dates that already have a confirmed guest booking.' };
+    }
+
+    const block: BlockedRange = {
+      id: 'BL-' + Date.now(),
+      from,
+      to,
+      reason: reason.trim() || 'Maintenance / Owner use'
+    };
+
+    this.rooms.update(list =>
+      list.map(r =>
+        r.id === roomId ? { ...r, blockedDates: [...r.blockedDates, block] } : r
+      )
+    );
+    this.saveRooms();
+    return { ok: true };
+  }
+
+  /** Remove a blocked date range from a room */
+  removeBlockedRange(roomId: number, blockId: string) {
+    this.rooms.update(list =>
+      list.map(r =>
+        r.id === roomId
+          ? { ...r, blockedDates: r.blockedDates.filter(b => b.id !== blockId) }
+          : r
+      )
+    );
+    this.saveRooms();
   }
 
   /** Reset mock data back to the initial seed state */
