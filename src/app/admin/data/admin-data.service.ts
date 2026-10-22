@@ -95,6 +95,30 @@ export class AdminDataService {
     return { ok: true };
   }
 
+  /** Reassign a booking to a different room (validating overlap & updating total price) */
+  assignRoom(bookingId: string, roomId: number): { ok: boolean; error?: string } {
+    const target = this.bookings().find(b => b.id === bookingId);
+    const room = this.roomById(roomId);
+    if (!target || !room) return { ok: false, error: 'Invalid booking or room.' };
+
+    if (
+      ACTIVE_STATUSES.includes(target.status) &&
+      this.hasRoomConflict(roomId, target.checkIn, target.checkOut, target.id)
+    ) {
+      return {
+        ok: false,
+        error: `${room.name} is already booked or blocked for those dates.`
+      };
+    }
+
+    const total = countNights(target.checkIn, target.checkOut) * room.price;
+    this.bookings.update(list =>
+      list.map(b => (b.id === bookingId ? { ...b, roomId, total } : b))
+    );
+    this.saveBookings();
+    return { ok: true };
+  }
+
   /** Create a new manual or website booking */
   addBooking(
     data: Omit<AdminBooking, 'id' | 'total' | 'createdAt'>

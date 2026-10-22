@@ -3,6 +3,7 @@ import { authGuard } from './auth/auth.guard';
 import { LoginComponent } from './auth/login/login.component';
 import { AdminShellComponent } from './layout/admin-shell/admin-shell.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { BookingsComponent } from './features/bookings/bookings.component';
 
 /** All admin pages. They load only when someone opens /admin. */
 export const ADMIN_ROUTES: Routes = [
@@ -14,6 +15,7 @@ export const ADMIN_ROUTES: Routes = [
     children: [                                  // pages shown inside the frame
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
+      { path: 'bookings', component: BookingsComponent },
       { path: '**', redirectTo: 'dashboard' }
     ]
   }

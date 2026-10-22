@@ -1,0 +1,179 @@
+<section class="bk">
+  <div class="head">
+    <div>
+      <h2>Bookings Management</h2>
+      <p class="sub">Confirm requests, assign rooms, check guests in or out, and add phone/walk-in bookings.</p>
+    </div>
+    <button class="btn" type="button" (click)="showNewForm.set(!showNewForm())">
+      {{ showNewForm() ? '✕ Close Form' : '+ New Booking' }}
+    </button>
+  </div>
+
+  @if (feedback(); as fb) {
+    <p class="msg-bar" [class.err]="fb.isError">{{ fb.text }}</p>
+  }
+
+  <!-- Collapsible Manual Booking Form -->
+  @if (showNewForm()) {
+    <form class="new-card" (ngSubmit)="submitNewBooking()">
+      <h3>Add Manual Booking (Phone / WhatsApp / Walk-In)</h3>
+
+      <div class="grid-3">
+        <div>
+          <label for="gName">GUEST NAME *</label>
+          <input id="gName" class="in" name="guestName" [(ngModel)]="form.guestName" placeholder="Full name" required>
+        </div>
+        <div>
+          <label for="gPhone">PHONE NUMBER *</label>
+          <input id="gPhone" class="in" name="phone" [(ngModel)]="form.phone" placeholder="+91 98..." required>
+        </div>
+        <div>
+          <label for="gEmail">EMAIL (OPTIONAL)</label>
+          <input id="gEmail" class="in" name="email" [(ngModel)]="form.email" placeholder="guest@email.com">
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <div>
+          <label for="gRoom">ROOM</label>
+          <select id="gRoom" class="in" name="roomId" [(ngModel)]="form.roomId">
+            @for (r of data.rooms(); track r.id) {
+              <option [ngValue]="r.id">{{ r.name }} (₹{{ r.price }}/night)</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="gIn">CHECK-IN DATE</label>
+          <input id="gIn" class="in" type="date" name="checkIn" [(ngModel)]="form.checkIn" required>
+        </div>
+        <div>
+          <label for="gOut">CHECK-OUT DATE</label>
+          <input id="gOut" class="in" type="date" name="checkOut" [(ngModel)]="form.checkOut" required>
+        </div>
+        <div>
+          <label for="gGuests">GUESTS</label>
+          <input id="gGuests" class="in" type="number" min="1" max="8" name="guests" [(ngModel)]="form.guests">
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div>
+          <label for="gSource">BOOKING SOURCE</label>
+          <select id="gSource" class="in" name="source" [(ngModel)]="form.source">
+            @for (s of sources; track s) {
+              <option [ngValue]="s">{{ s }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="gStatus">INITIAL STATUS</label>
+          <select id="gStatus" class="in" name="status" [(ngModel)]="form.status">
+            <option value="Confirmed">Confirmed (blocks room immediately)</option>
+            <option value="Pending">Pending (request only)</option>
+          </select>
+        </div>
+        <div>
+          <label for="gNote">SPECIAL NOTE</label>
+          <input id="gNote" class="in" name="note" [(ngModel)]="form.note" placeholder="Arrival time, food preference...">
+        </div>
+      </div>
+
+      <div class="form-foot">
+        <button class="btn" type="submit">Save Booking</button>
+      </div>
+    </form>
+  }
+
+  <!-- Filters & Search -->
+  <div class="toolbar">
+    <div class="tabs">
+      @for (st of statuses; track st) {
+        <button
+          type="button"
+          class="tab"
+          [class.active]="statusFilter() === st"
+          (click)="statusFilter.set(st)">
+          {{ st }}
+        </button>
+      }
+    </div>
+
+    <input
+      class="in search"
+      type="search"
+      placeholder="Search guest, phone or ID..."
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)">
+  </div>
+
+  <!-- Bookings List -->
+  @if (filteredBookings().length === 0) {
+    <div class="empty-card">No bookings match your current filter.</div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID &amp; Source</th>
+            <th>Guest</th>
+            <th>Dates &amp; Nights</th>
+            <th>Assigned Room</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (b of filteredBookings(); track b.id) {
+            <tr>
+              <td>
+                <strong>{{ b.id }}</strong>
+                <span class="src">{{ b.source }}</span>
+              </td>
+              <td>
+                <strong>{{ b.guestName }}</strong>
+                <small>{{ b.guests }} guests · <a [href]="waLink(b.phone, b.guestName)" target="_blank" rel="noopener">💬 {{ b.phone }}</a></small>
+                @if (b.note) {
+                  <small class="note">"{{ b.note }}"</small>
+                }
+              </td>
+              <td>
+                <span>{{ b.checkIn }} → {{ b.checkOut }}</span>
+                <small>{{ nights(b.checkIn, b.checkOut) }} night(s)</small>
+              </td>
+              <td>
+                <select
+                  class="room-select"
+                  [ngModel]="b.roomId"
+                  (ngModelChange)="changeRoom(b.id, $event)">
+                  @for (r of data.rooms(); track r.id) {
+                    <option [ngValue]="r.id">{{ r.name }}</option>
+                  }
+                </select>
+              </td>
+              <td class="price">₹{{ b.total }}</td>
+              <td>
+                <span class="status" [attr.data-status]="b.status">{{ b.status }}</span>
+              </td>
+              <td>
+                <div class="acts">
+                  @if (b.status === 'Pending') {
+                    <button class="act ok" type="button" (click)="setStatus(b.id, 'Confirmed')">Confirm</button>
+                    <button class="act no" type="button" (click)="setStatus(b.id, 'Rejected')">Reject</button>
+                  }
+                  @if (b.status === 'Confirmed') {
+                    <button class="act in-btn" type="button" (click)="setStatus(b.id, 'CheckedIn')">Check In</button>
+                    <button class="act no" type="button" (click)="setStatus(b.id, 'Cancelled')">Cancel</button>
+                  }
+                  @if (b.status === 'CheckedIn') {
+                    <button class="act out-btn" type="button" (click)="setStatus(b.id, 'CheckedOut')">Check Out</button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

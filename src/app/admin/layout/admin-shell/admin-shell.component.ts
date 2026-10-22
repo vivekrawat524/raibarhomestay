@@ -21,7 +21,7 @@ export class AdminShellComponent {
 
   nav: NavItem[] = [
     { label: 'Dashboard', icon: '📊', path: 'dashboard', ready: true },
-    { label: 'Bookings',  icon: '📅', path: 'bookings',  ready: false },
+    { label: 'Bookings',  icon: '📅', path: 'bookings',  ready: true },
     { label: 'Rooms',     icon: '🛏️', path: 'rooms',     ready: false },
     { label: 'Trips',     icon: '🏔️', path: 'trips',     ready: false },
     { label: 'Website',   icon: '🖼️', path: 'content',   ready: false },
