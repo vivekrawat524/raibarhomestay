@@ -35,7 +35,8 @@
     <header class="top">
       <button class="burger" type="button" aria-label="Open menu" (click)="toggle()">☰</button>
       <h1>Admin Panel</h1>
-      <span class="who">Owner</span>
+      <span class="who">{{ auth.user()?.email || 'Owner' }}</span>
+      <button class="logout-btn" type="button" (click)="logout()">Log out</button>
     </header>
 
     <main class="content">

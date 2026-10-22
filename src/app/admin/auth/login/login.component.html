@@ -1,0 +1,29 @@
+<div class="login-page">
+  <form class="login-card" (ngSubmit)="submit()">
+
+    <div class="brand">
+      <img src="images/p8.jpeg" alt="RAIBAR HOMESTAY logo">
+      <div>
+        <strong>{{ site.name }}</strong>
+        <small>Owner Admin Panel</small>
+      </div>
+    </div>
+
+   
+    <h1>SIGN IN</h1>
+
+    <label for="email">EMAIL ADDRESS</label>
+    <input id="email" class="in" type="email" name="email" [(ngModel)]="email" placeholder="owner@raibarhomestay.com" required>
+
+    <label for="password">PASSWORD</label>
+    <input id="password" class="in" type="password" name="password" [(ngModel)]="password" placeholder="••••" required>
+
+    @if (error()) {
+      <p class="err">{{ error() }}</p>
+    }
+
+    <button class="btn submit-btn" type="submit">SIGN IN →</button>
+
+    <a class="back-link" routerLink="/">← Back to customer website</a>
+  </form>
+</div>

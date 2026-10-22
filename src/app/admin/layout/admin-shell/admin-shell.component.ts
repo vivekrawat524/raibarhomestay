@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SITE } from '../../../core/site.data';
+import { AuthService } from '../../auth/auth.service';
 
 /** One item in the admin sidebar. ready = false means "built in a later task" */
 interface NavItem { label: string; icon: string; path: string; ready: boolean }
@@ -12,6 +13,7 @@ interface NavItem { label: string; icon: string; path: string; ready: boolean }
   styleUrl: './admin-shell.component.scss'
 })
 export class AdminShellComponent {
+  auth = inject(AuthService);
   site = SITE;
 
   /** on phones the sidebar is hidden until the ☰ button is pressed */
@@ -29,4 +31,5 @@ export class AdminShellComponent {
 
   toggle() { this.menuOpen.update(open => !open); }
   close() { this.menuOpen.set(false); }
+  logout() { this.auth.logout(); }
 }
