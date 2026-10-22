@@ -1,0 +1,46 @@
+<div class="admin" [class.menu-open]="menuOpen()">
+
+  <!-- LEFT: sidebar menu -->
+  <aside class="side">
+    <div class="brand">
+      <img src="images/p8.jpeg" alt="">
+      <div>
+        <strong>{{ site.name }}</strong>
+        <small>Admin panel</small>
+      </div>
+    </div>
+
+    <nav>
+      @for (item of nav; track item.path) {
+        @if (item.ready) {
+          <a [routerLink]="['/admin', item.path]" routerLinkActive="active" (click)="close()">
+            <span class="ic">{{ item.icon }}</span>{{ item.label }}
+          </a>
+        } @else {
+          <span class="soon" title="Coming in a later task">
+            <span class="ic">{{ item.icon }}</span>{{ item.label }}<em>Soon</em>
+          </span>
+        }
+      }
+    </nav>
+
+    <a class="site-link" href="/" target="_blank" rel="noopener">↗ View website</a>
+  </aside>
+
+  <!-- dark layer behind the sidebar on phones; tap it to close the menu -->
+  <div class="backdrop" (click)="close()"></div>
+
+  <!-- RIGHT: top bar + the current admin page -->
+  <div class="main">
+    <header class="top">
+      <button class="burger" type="button" aria-label="Open menu" (click)="toggle()">☰</button>
+      <h1>Admin Panel</h1>
+      <span class="who">Owner</span>
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+
+</div>

@@ -1,0 +1,49 @@
+/* Admin layout: sidebar on the left, top bar + page on the right.
+   Colours come from the variables in src/styles.scss (--dk, --gold, --cream, --ink, --line). */
+
+.admin { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; background: #f6f4ef; color: var(--ink); }
+
+/* ---- sidebar ---- */
+.side { background: var(--dk); color: #e9e4d8; display: flex; flex-direction: column; padding: 22px 14px; position: sticky; top: 0; height: 100vh; }
+
+.brand {
+  display: flex; align-items: center; gap: 10px; padding: 0 8px 20px; margin-bottom: 14px; border-bottom: 1px solid rgba(255, 255, 255, .1);
+  img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  strong { display: block; font-size: 14px; letter-spacing: .06em; }
+  small { color: var(--gold); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+}
+
+nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+nav a, .soon { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 500; }
+nav a {
+  transition: background .2s;
+  &:hover { background: rgba(255, 255, 255, .08); }
+  &.active { background: var(--gold); color: #111; font-weight: 700; }
+}
+.soon {
+  opacity: .45; cursor: not-allowed;
+  em { margin-left: auto; font-style: normal; font-size: 10px; letter-spacing: .1em; border: 1px solid currentColor; border-radius: 999px; padding: 1px 7px; }
+}
+.ic { width: 20px; text-align: center; }
+.site-link { padding: 10px 12px; font-size: 13px; font-weight: 700; color: var(--gold); }
+
+/* ---- right side ---- */
+.main { display: flex; flex-direction: column; min-width: 0; }
+.top {
+  display: flex; align-items: center; gap: 14px; padding: 16px 28px; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5;
+  h1 { font-size: 18px; flex: 1; }
+}
+.who { font-size: 13px; font-weight: 700; background: var(--cream); padding: 6px 14px; border-radius: 999px; }
+.burger { display: none; background: none; border: 0; font-size: 22px; cursor: pointer; }
+.content { padding: 28px; }
+.backdrop { display: none; }
+
+/* ---- phones and small tablets: sidebar slides in from the left ---- */
+@media (max-width: 900px) {
+  .admin { grid-template-columns: 1fr; }
+  .side { position: fixed; inset: 0 auto 0 0; width: 250px; z-index: 20; transform: translateX(-100%); transition: transform .25s; }
+  .menu-open .side { transform: none; }
+  .menu-open .backdrop { display: block; position: fixed; inset: 0; z-index: 15; background: rgba(0, 0, 0, .4); }
+  .burger { display: block; }
+  .content { padding: 18px; }
+}

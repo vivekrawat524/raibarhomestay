@@ -1,0 +1,15 @@
+<section class="dash">
+  <p class="date">{{ today | date: 'EEEE, d MMMM y' }}</p>
+  <h2>Welcome, Owner 👋</h2>
+  <p class="intro">This is your admin panel. Soon you will manage bookings, rooms, trips and website content from here.</p>
+
+  <div class="cards">
+    @for (card of cards; track card.label) {
+      <div class="card">
+        <span>{{ card.label }}</span>
+        <strong>{{ card.value }}</strong>
+        <small>{{ card.note }}</small>
+      </div>
+    }
+  </div>
+</section>

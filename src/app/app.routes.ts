@@ -7,5 +7,6 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'book', component: BookingComponent },
   { path: 'trip/:id', component: TripDetailComponent },
+  { path: 'admin', loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES) },
   { path: '**', redirectTo: '' }
 ];

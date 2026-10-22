@@ -1,0 +1,11 @@
+.date { color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+h2 { font-size: 28px; margin: 6px 0 8px; }
+.intro { color: var(--mut); max-width: 620px; margin-bottom: 26px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+.card {
+  background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 4px;
+  span { font-size: 13px; font-weight: 700; }
+  strong { font-size: 32px; color: var(--gold); line-height: 1.2; }
+  small { color: var(--mut); font-size: 12px; }
+}

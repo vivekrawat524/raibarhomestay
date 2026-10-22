@@ -1,4 +1,8 @@
-<app-navbar />
+@if (!isAdmin()) {
+  <app-navbar />
+}
 <router-outlet />
-<app-footer />
-<app-whatsapp-fab />
+@if (!isAdmin()) {
+  <app-footer />
+  <app-whatsapp-fab />
+}
