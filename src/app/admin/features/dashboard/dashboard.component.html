@@ -1,15 +1,68 @@
 <section class="dash">
   <p class="date">{{ today | date: 'EEEE, d MMMM y' }}</p>
   <h2>Welcome, Owner 👋</h2>
-  <p class="intro">This is your admin panel. Soon you will manage bookings, rooms, trips and website content from here.</p>
+  <p class="intro">Here is today's live summary across your {{ data.rooms().length }} homestay rooms.</p>
 
+  <!-- 4 Summary Stat Cards -->
   <div class="cards">
-    @for (card of cards; track card.label) {
+    @for (card of cards(); track card.label) {
       <div class="card">
         <span>{{ card.label }}</span>
         <strong>{{ card.value }}</strong>
         <small>{{ card.note }}</small>
       </div>
     }
+  </div>
+
+  @if (feedback()) {
+    <p class="notice">{{ feedback() }}</p>
+  }
+
+  <div class="panels">
+    <!-- LEFT PANEL: Pending booking requests -->
+    <div class="panel">
+      <h3>Pending Booking Requests ({{ data.pendingBookings().length }})</h3>
+
+      @if (data.pendingBookings().length === 0) {
+        <p class="empty">All caught up! No pending booking requests right now.</p>
+      } @else {
+        <div class="req-list">
+          @for (b of data.pendingBookings(); track b.id) {
+            <div class="req-item">
+              <div class="req-info">
+                <strong>{{ b.guestName }} <span class="tag">{{ b.source }}</span></strong>
+                <span>{{ roomName(b.roomId) }} · {{ b.guests }} guests · ₹{{ b.total }}</span>
+                <small>{{ b.checkIn }} → {{ b.checkOut }} · 📞 {{ b.phone }}</small>
+                @if (b.note) {
+                  <small class="note">"{{ b.note }}"</small>
+                }
+              </div>
+              <div class="req-actions">
+                <button class="act-btn ok" type="button" (click)="confirm(b.id)">Confirm</button>
+                <button class="act-btn no" type="button" (click)="reject(b.id)">Reject</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- RIGHT PANEL: Tonight's room availability (5 rooms) -->
+    <div class="panel">
+      <h3>Tonight's Room Availability</h3>
+      <div class="room-list">
+        @for (r of tonightRooms(); track r.id) {
+          <div class="room-row">
+            <div>
+              <strong>{{ r.name }}</strong>
+              <small>₹{{ r.price }} / night · up to {{ r.capacity }} guests</small>
+            </div>
+            <span class="badge" [class.busy]="r.occupied" [class.free]="!r.occupied">
+              {{ r.occupied ? 'Occupied' : 'Available' }}
+            </span>
+          </div>
+        }
+      </div>
+    </div>
   </div>
 </section>
