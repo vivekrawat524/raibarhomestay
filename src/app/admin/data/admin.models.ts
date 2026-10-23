@@ -43,6 +43,26 @@ export interface AdminBooking {
   createdAt: string;    // YYYY-MM-DD
 }
 
+export interface TripDeparture {
+  id: string;
+  date: string;         // YYYY-MM-DD
+  capacity: number;     // max travellers for this departure
+  booked: number;       // seats already booked
+}
+
+export interface AdminTrip {
+  id: number;
+  days: number;
+  title: string;
+  desc: string;
+  price: number;              // price per person (INR)
+  img: string;
+  fixedTemples: string[];     // temple keys from TEMPLES (e.g. 'bh', 'ar')
+  optionalTemples: string[];  // optional trek/add-on temple keys
+  active: boolean;
+  departures: TripDeparture[];
+}
+
 /**
  * Half-open date range check: [aFrom, aTo) overlaps [bFrom, bTo).
  * Allows a new guest to check in on the exact day the previous guest checks out.

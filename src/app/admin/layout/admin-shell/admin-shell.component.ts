@@ -23,7 +23,7 @@ export class AdminShellComponent {
     { label: 'Dashboard', icon: '📊', path: 'dashboard', ready: true },
     { label: 'Bookings',  icon: '📅', path: 'bookings',  ready: true },
     { label: 'Rooms',     icon: '🛏️', path: 'rooms',     ready: true},
-    { label: 'Trips',     icon: '🏔️', path: 'trips',     ready: false },
+    { label: 'Trips',     icon: '🏔️', path: 'trips',     ready: true},
     { label: 'Website',   icon: '🖼️', path: 'content',   ready: false },
     { label: 'Payments',  icon: '💳', path: 'payments',  ready: false },
     { label: 'Settings',  icon: '⚙️', path: 'settings',  ready: false }

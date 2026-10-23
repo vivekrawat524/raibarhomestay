@@ -5,6 +5,7 @@ import { AdminShellComponent } from './layout/admin-shell/admin-shell.component'
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { BookingsComponent } from './features/bookings/bookings.component';
 import { RoomsComponent } from './features/rooms/rooms.component';
+import { TripsComponent } from './features/trips/trips.component';
 
 /** All admin pages. They load only when someone opens /admin. */
 export const ADMIN_ROUTES: Routes = [
@@ -18,6 +19,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'bookings', component: BookingsComponent },
       { path: 'rooms', component: RoomsComponent },
+      { path: 'trips', component: TripsComponent },
       { path: '**', redirectTo: 'dashboard' }
     ]
   }

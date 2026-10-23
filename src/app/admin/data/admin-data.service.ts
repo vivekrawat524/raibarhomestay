@@ -1,9 +1,10 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { AdminBooking, AdminRoom, BlockedRange, BookingStatus, countNights, datesOverlap } from './admin.models';
-import { SEED_ROOMS, buildSeedBookings, dayOffset } from './admin.seed';
+import { AdminBooking, AdminRoom, AdminTrip, BlockedRange, BookingStatus, TripDeparture, countNights, datesOverlap } from './admin.models';
+import { SEED_ROOMS, buildSeedBookings, buildSeedTrips, dayOffset } from './admin.seed';
 
 const ROOMS_KEY = 'raibar-admin-rooms-v1';
 const BOOKINGS_KEY = 'raibar-admin-bookings-v1';
+const TRIPS_KEY = 'raibar-admin-trips-v1';
 
 /** Statuses that occupy a room on the calendar */
 const ACTIVE_STATUSES: BookingStatus[] = ['Confirmed', 'CheckedIn'];
@@ -12,6 +13,7 @@ const ACTIVE_STATUSES: BookingStatus[] = ['Confirmed', 'CheckedIn'];
 export class AdminDataService {
   rooms = signal<AdminRoom[]>(this.loadRooms());
   bookings = signal<AdminBooking[]>(this.loadBookings());
+  trips = signal<AdminTrip[]>(this.loadTrips());
 
   today = dayOffset(0);
 
@@ -233,12 +235,86 @@ export class AdminDataService {
     this.saveRooms();
   }
 
+  /** Add a new travel package or update an existing one */
+  saveTrip(tripData: Omit<AdminTrip, 'id' | 'departures'> & { id?: number }): AdminTrip {
+    if (tripData.id) {
+      let updated!: AdminTrip;
+      this.trips.update(list =>
+        list.map(t => {
+          if (t.id === tripData.id) {
+            updated = { ...t, ...tripData, id: t.id };
+            return updated;
+          }
+          return t;
+        })
+      );
+      this.saveTrips();
+      return updated;
+    }
+
+    const nextId = this.trips().reduce((max, t) => Math.max(max, t.id), 0) + 1;
+    const created: AdminTrip = {
+      ...tripData,
+      id: nextId,
+      departures: []
+    };
+    this.trips.update(list => [...list, created]);
+    this.saveTrips();
+    return created;
+  }
+
+  /** Activate or hide a travel package */
+  toggleTripActive(tripId: number) {
+    this.trips.update(list =>
+      list.map(t => (t.id === tripId ? { ...t, active: !t.active } : t))
+    );
+    this.saveTrips();
+  }
+
+  /** Add a scheduled departure date & seat capacity to a travel package */
+  addTripDeparture(
+    tripId: number,
+    date: string,
+    capacity: number
+  ): { ok: boolean; error?: string } {
+    if (!date || capacity < 1) {
+      return { ok: false, error: 'Please enter a valid departure date and seat capacity.' };
+    }
+    const dep: TripDeparture = {
+      id: 'DEP-' + Date.now(),
+      date,
+      capacity: Number(capacity),
+      booked: 0
+    };
+    this.trips.update(list =>
+      list.map(t =>
+        t.id === tripId ? { ...t, departures: [...t.departures, dep] } : t
+      )
+    );
+    this.saveTrips();
+    return { ok: true };
+  }
+
+  /** Remove a departure date from a travel package */
+  removeTripDeparture(tripId: number, depId: string) {
+    this.trips.update(list =>
+      list.map(t =>
+        t.id === tripId
+          ? { ...t, departures: t.departures.filter(d => d.id !== depId) }
+          : t
+      )
+    );
+    this.saveTrips();
+  }
+
   /** Reset mock data back to the initial seed state */
   resetDemoData() {
     this.rooms.set(structuredClone(SEED_ROOMS));
     this.bookings.set(buildSeedBookings());
+    this.trips.set(buildSeedTrips());
     this.saveRooms();
     this.saveBookings();
+    this.saveTrips();
   }
 
   private loadRooms(): AdminRoom[] {
@@ -259,11 +335,24 @@ export class AdminDataService {
     }
   }
 
+  private loadTrips(): AdminTrip[] {
+    try {
+      const raw = localStorage.getItem(TRIPS_KEY);
+      return raw ? JSON.parse(raw) : buildSeedTrips();
+    } catch {
+      return buildSeedTrips();
+    }
+  }
+
   private saveRooms() {
     try { localStorage.setItem(ROOMS_KEY, JSON.stringify(this.rooms())); } catch { /* ignore */ }
   }
 
   private saveBookings() {
     try { localStorage.setItem(BOOKINGS_KEY, JSON.stringify(this.bookings())); } catch { /* ignore */ }
+  }
+
+  private saveTrips() {
+    try { localStorage.setItem(TRIPS_KEY, JSON.stringify(this.trips())); } catch { /* ignore */ }
   }
 }

@@ -1,4 +1,4 @@
-import { AdminBooking, AdminRoom } from './admin.models';
+import { AdminBooking, AdminRoom, AdminTrip } from './admin.models';
 
 /** Helper to get YYYY-MM-DD offset by N days from today */
 export function dayOffset(days: number): string {
@@ -35,10 +35,10 @@ export const SEED_ROOMS: AdminRoom[] = [
     id: 3,
     name: 'Himalayan Sunrise Suite',
     desc: 'Spacious corner room with large windows facing the snow peaks and terrace access.',
-    price: 1000,
-    capacity: 2,
+    price: 1500,
+    capacity: 3,
     img: 'images/p15.png',
-    tags: ['2GUESTS', 'MOUNTAIN VIEW', 'TERRACE', 'WIFI', 'HOT WATER'],
+    tags: ['3 GUESTS', 'MOUNTAIN VIEW', 'TERRACE', 'WIFI', 'HOT WATER'],
     active: true,
     blockedDates: []
   },
@@ -46,8 +46,8 @@ export const SEED_ROOMS: AdminRoom[] = [
     id: 4,
     name: 'Pine Forest View Room',
     desc: 'Quiet room overlooking deodar and pine trees, ideal for long restful stays.',
-    price: 1000,
-    capacity:  2,
+    price: 1200,
+    capacity: 2,
     img: 'images/p16.png',
     tags: ['2 GUESTS', 'FOREST VIEW', 'QUIET', 'WIFI', 'HOT WATER'],
     active: true,
@@ -57,14 +57,63 @@ export const SEED_ROOMS: AdminRoom[] = [
     id: 5,
     name: 'Family Mountain Cottage',
     desc: 'Large family room with two double beds and private sit-out area for groups.',
-    price: 1000,
-    capacity: 2,
+    price: 1800,
+    capacity: 4,
     img: 'images/p9.jpeg',
-    tags: ['2 GUESTS', 'FAMILY ROOM', 'PRIVATE SIT-OUT', 'WIFI', 'HOT WATER'],
+    tags: ['4 GUESTS', 'FAMILY ROOM', 'PRIVATE SIT-OUT', 'WIFI', 'HOT WATER'],
     active: true,
     blockedDates: []
   }
 ];
+
+/** Initial 3 travel packages (2-day, 5-day and 7-day temple trips) */
+export function buildSeedTrips(): AdminTrip[] {
+  return [
+    {
+      id: 1,
+      days: 2,
+      title: '2-Day Road Trip',
+      desc: 'Bhairokhal, Ardhnareshwar, Hanseshwar and Rahu Mandir by road, with Tarakund as an optional add-on.',
+      price: 2999,
+      img: 'images/p12.jpeg',
+      fixedTemples: ['bh', 'ar', 'ha', 'ra'],
+      optionalTemples: ['ta'],
+      active: true,
+      departures: [
+        { id: 'DEP-1', date: dayOffset(3), capacity: 8, booked: 4 },
+        { id: 'DEP-2', date: dayOffset(10), capacity: 8, booked: 0 }
+      ]
+    },
+    {
+      id: 2,
+      days: 5,
+      title: '5-Day Long Trip',
+      desc: 'Bhairokhal, Ardhnareshwar, Tarakund and Rahu Mandir, with Deeba and Binsar Mahadev as optional treks.',
+      price: 3999,
+      img: 'images/p13.jpeg',
+      fixedTemples: ['bh', 'ar', 'ta', 'ra'],
+      optionalTemples: ['de', 'bi'],
+      active: true,
+      departures: [
+        { id: 'DEP-3', date: dayOffset(5), capacity: 10, booked: 6 }
+      ]
+    },
+    {
+      id: 3,
+      days: 7,
+      title: '7-Day Grand Trip',
+      desc: 'Bhairokhal, Ardhnareshwar, Tarakund, Rahu Mandir and Maa Kalinka, with Deeba and Binsar Mahadev as optional treks.',
+      price: 4999,
+      img: 'images/p10.jpeg',
+      fixedTemples: ['bh', 'ar', 'ta', 'ra', 'ka'],
+      optionalTemples: ['de', 'bi'],
+      active: true,
+      departures: [
+        { id: 'DEP-4', date: dayOffset(7), capacity: 12, booked: 3 }
+      ]
+    }
+  ];
+}
 
 /** Sample bookings relative to today so the dashboard always has realistic activity */
 export function buildSeedBookings(): AdminBooking[] {

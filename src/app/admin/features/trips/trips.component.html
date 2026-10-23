@@ -1,0 +1,147 @@
+<section class="tr">
+  <div class="head">
+    <div>
+      <h2>Travel Packages ({{ data.trips().length }} Trips)</h2>
+      <p class="sub">Manage 2-day, 5-day and 7-day temple itineraries, prices, departure dates and seat capacities.</p>
+    </div>
+    <button class="btn" type="button" (click)="showEditor() ? showEditor.set(false) : openNewTrip()">
+      {{ showEditor() ? '✕ Close Editor' : '+ Add Package' }}
+    </button>
+  </div>
+
+  @if (feedback(); as fb) {
+    <p class="msg-bar" [class.err]="fb.isError">{{ fb.text }}</p>
+  }
+
+  <!-- Add / Edit Package Form -->
+  @if (showEditor()) {
+    <form class="editor-card" (ngSubmit)="saveTrip()">
+      <h3>{{ editingId() ? 'Edit Package #' + editingId() : 'Add New Travel Package' }}</h3>
+
+      <div class="grid-4">
+        <div>
+          <label for="tTitle">PACKAGE TITLE *</label>
+          <input id="tTitle" class="in" name="title" [(ngModel)]="form.title" placeholder="e.g. 2-Day Road Trip" required>
+        </div>
+        <div>
+          <label for="tDays">DURATION (DAYS) *</label>
+          <input id="tDays" class="in" type="number" min="1" max="15" name="days" [(ngModel)]="form.days" required>
+        </div>
+        <div>
+          <label for="tPrice">PRICE PER PERSON (₹) *</label>
+          <input id="tPrice" class="in" type="number" min="100" name="price" [(ngModel)]="form.price" required>
+        </div>
+        <div>
+          <label for="tImg">COVER IMAGE</label>
+          <input id="tImg" class="in" name="img" [(ngModel)]="form.img" placeholder="images/p12.jpeg">
+        </div>
+      </div>
+
+      <div>
+        <label for="tDesc">ITINERARY DESCRIPTION</label>
+        <textarea id="tDesc" class="in" name="desc" [(ngModel)]="form.desc" placeholder="Describe the temples and route..."></textarea>
+      </div>
+
+      <div class="temple-pickers">
+        <div>
+          <label>INCLUDED TEMPLES (FIXED)</label>
+          <div class="checks">
+            @for (tm of temples; track tm.key) {
+              <label class="chk">
+                <input type="checkbox" [name]="'fix_' + tm.key" [(ngModel)]="form.fixed[tm.key]">
+                {{ tm.name }}
+              </label>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label>OPTIONAL ADD-ON / TREK TEMPLES</label>
+          <div class="checks">
+            @for (tm of temples; track tm.key) {
+              <label class="chk">
+                <input type="checkbox" [name]="'opt_' + tm.key" [(ngModel)]="form.optional[tm.key]">
+                {{ tm.name }}
+              </label>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-foot">
+        <button class="btn" type="submit">{{ editingId() ? 'Update Package' : 'Create Package' }}</button>
+      </div>
+    </form>
+  }
+
+  <!-- Travel Packages Grid -->
+  <div class="trip-grid">
+    @for (t of data.trips(); track t.id) {
+      <article class="trip-card" [class.inactive]="!t.active">
+        <div class="photo-wrap">
+          <img [src]="t.img" [alt]="t.title">
+          <span class="days-pill">{{ t.days }} Days</span>
+          <span class="status-pill" [class.off]="!t.active">{{ t.active ? 'Active' : 'Hidden' }}</span>
+        </div>
+
+        <div class="body">
+          <div class="title-row">
+            <h3>{{ t.title }}</h3>
+            <strong class="price">₹{{ t.price }}<small>/person</small></strong>
+          </div>
+
+          <p class="desc">{{ t.desc }}</p>
+
+          <div class="temple-tags">
+            <small>Included Temples ({{ t.fixedTemples.length }}):</small>
+            <div class="tags">
+              @for (k of t.fixedTemples; track k) {
+                <span>🛕 {{ templeName(k) }}</span>
+              }
+            </div>
+          </div>
+
+          @if (t.optionalTemples.length > 0) {
+            <div class="temple-tags">
+              <small>Optional Treks ({{ t.optionalTemples.length }}):</small>
+              <div class="tags">
+                @for (k of t.optionalTemples; track k) {
+                  <span>🥾 {{ templeName(k) }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="card-actions">
+            <button class="act edit" type="button" (click)="openEditTrip(t)">✏️ Edit Package</button>
+            <button class="act" type="button" (click)="toggleActive(t)">
+              {{ t.active ? 'Hide Package' : 'Activate' }}
+            </button>
+          </div>
+
+          <!-- Departures & Capacity -->
+          <div class="deps">
+            <h4>Upcoming Departures &amp; Capacity ({{ t.departures.length }})</h4>
+
+            @if (t.departures.length > 0) {
+              <ul class="dep-list">
+                @for (d of t.departures; track d.id) {
+                  <li>
+                    <span><strong>{{ d.date }}</strong> · {{ d.booked }} / {{ d.capacity }} seats booked</span>
+                    <button type="button" (click)="removeDeparture(t.id, d.id)">Remove</button>
+                  </li>
+                }
+              </ul>
+            }
+
+            <div class="dep-form">
+              <input class="in" type="date" [(ngModel)]="depFormFor(t.id).date" aria-label="Departure date">
+              <input class="in" type="number" min="1" max="30" [(ngModel)]="depFormFor(t.id).capacity" placeholder="Seats">
+              <button class="act add-dep" type="button" (click)="addDeparture(t.id)">+ Add Date</button>
+            </div>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+</section>
