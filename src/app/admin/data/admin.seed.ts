@@ -1,4 +1,5 @@
-import { AdminBooking, AdminRoom, AdminTrip } from './admin.models';
+import { GALLERY, SITE } from '../../core/site.data';
+import { AdminBooking, AdminReview, AdminRoom, AdminTrip, BusinessSettings, SiteContent } from './admin.models';
 
 /** Helper to get YYYY-MM-DD offset by N days from today */
 export function dayOffset(days: number): string {
@@ -177,4 +178,55 @@ export function buildSeedBookings(): AdminBooking[] {
       createdAt: today
     }
   ];
+}
+
+/** Initial homepage text and gallery images */
+export function buildSeedContent(): SiteContent {
+  return {
+    heroTagline: SITE.tagline,
+    aboutHeading: 'A quiet home in the Garhwal hills',
+    aboutText: 'Surrounded by deodar forests and sacred shrines, Raibar Homestay offers homemade Pahadi meals, warm hospitality, and guided temple journeys.',
+    gallery: GALLERY.map((g, i) => ({ id: 'G-' + (i + 1), src: g.src, alt: g.alt }))
+  };
+}
+
+/** Sample guest reviews for moderation */
+export function buildSeedReviews(): AdminReview[] {
+  return [
+    {
+      id: 'RV-1',
+      name: 'Sandeep Bisht',
+      rating: 5,
+      stay: 'Homestay stay',
+      text: 'Peaceful location, very clean rooms and delicious home-cooked Garhwali food!',
+      date: dayOffset(-7),
+      status: 'Approved'
+    },
+    {
+      id: 'RV-2',
+      name: 'Meera Nair',
+      rating: 5,
+      stay: '5-Day Long Trip',
+      text: 'The Rahu Mandir and Tarakund trek arrangement was seamless. Highly recommended.',
+      date: dayOffset(-1),
+      status: 'Pending'
+    }
+  ];
+}
+
+/** Initial owner business settings */
+export function buildSeedSettings(): BusinessSettings {
+  return {
+    name: SITE.name,
+    tagline: SITE.tagline,
+    phone: SITE.phone,
+    whatsapp: SITE.whatsapp,
+    email: SITE.email,
+    address: SITE.address,
+    instagram: SITE.instagram,
+    facebook: SITE.facebook,
+    checkInTime: '12:00 PM',
+    checkOutTime: '10:00 AM',
+    cancellationPolicy: 'Free cancellation up to 48 hours before check-in.'
+  };
 }

@@ -1,10 +1,34 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { AdminBooking, AdminRoom, AdminTrip, BlockedRange, BookingStatus, TripDeparture, countNights, datesOverlap } from './admin.models';
-import { SEED_ROOMS, buildSeedBookings, buildSeedTrips, dayOffset } from './admin.seed';
+import {
+  AdminBooking,
+  AdminReview,
+  AdminRoom,
+  AdminTrip,
+  BlockedRange,
+  BookingStatus,
+  BusinessSettings,
+  ReviewStatus,
+  SiteContent,
+  TripDeparture,
+  countNights,
+  datesOverlap
+} from './admin.models';
+import {
+  SEED_ROOMS,
+  buildSeedBookings,
+  buildSeedContent,
+  buildSeedReviews,
+  buildSeedSettings,
+  buildSeedTrips,
+  dayOffset
+} from './admin.seed';
 
 const ROOMS_KEY = 'raibar-admin-rooms-v1';
 const BOOKINGS_KEY = 'raibar-admin-bookings-v1';
 const TRIPS_KEY = 'raibar-admin-trips-v1';
+const CONTENT_KEY = 'raibar-admin-content-v1';
+const REVIEWS_KEY = 'raibar-admin-reviews-v1';
+const SETTINGS_KEY = 'raibar-admin-settings-v1';
 
 /** Statuses that occupy a room on the calendar */
 const ACTIVE_STATUSES: BookingStatus[] = ['Confirmed', 'CheckedIn'];
@@ -14,6 +38,9 @@ export class AdminDataService {
   rooms = signal<AdminRoom[]>(this.loadRooms());
   bookings = signal<AdminBooking[]>(this.loadBookings());
   trips = signal<AdminTrip[]>(this.loadTrips());
+  content = signal<SiteContent>(this.loadContent());
+  reviews = signal<AdminReview[]>(this.loadReviews());
+  settings = signal<BusinessSettings>(this.loadSettings());
 
   today = dayOffset(0);
 
@@ -307,14 +334,53 @@ export class AdminDataService {
     this.saveTrips();
   }
 
+  /** Save homepage text */
+  saveSiteText(heroTagline: string, aboutHeading: string, aboutText: string) {
+    this.content.update(c => ({ ...c, heroTagline, aboutHeading, aboutText }));
+    this.saveContent();
+  }
+
+  /** Add a photo to the website gallery */
+  addGalleryPhoto(src: string, alt: string) {
+    const item = { id: 'G-' + Date.now(), src: src.trim(), alt: alt.trim() || 'Homestay photo' };
+    this.content.update(c => ({ ...c, gallery: [item, ...c.gallery] }));
+    this.saveContent();
+  }
+
+  /** Remove a photo from the website gallery */
+  removeGalleryPhoto(id: string) {
+    this.content.update(c => ({ ...c, gallery: c.gallery.filter(g => g.id !== id) }));
+    this.saveContent();
+  }
+
+  /** Approve or hide a guest review */
+  setReviewStatus(id: string, status: ReviewStatus) {
+    this.reviews.update(list =>
+      list.map(r => (r.id === id ? { ...r, status } : r))
+    );
+    this.saveReviews();
+  }
+
+  /** Save owner business settings */
+  saveSettings(next: BusinessSettings) {
+    this.settings.set({ ...next });
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(this.settings())); } catch { /* ignore */ }
+  }
+
   /** Reset mock data back to the initial seed state */
   resetDemoData() {
     this.rooms.set(structuredClone(SEED_ROOMS));
     this.bookings.set(buildSeedBookings());
     this.trips.set(buildSeedTrips());
+    this.content.set(buildSeedContent());
+    this.reviews.set(buildSeedReviews());
+    this.settings.set(buildSeedSettings());
     this.saveRooms();
     this.saveBookings();
     this.saveTrips();
+    this.saveContent();
+    this.saveReviews();
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(this.settings())); } catch { /* ignore */ }
   }
 
   private loadRooms(): AdminRoom[] {
@@ -344,6 +410,33 @@ export class AdminDataService {
     }
   }
 
+  private loadContent(): SiteContent {
+    try {
+      const raw = localStorage.getItem(CONTENT_KEY);
+      return raw ? JSON.parse(raw) : buildSeedContent();
+    } catch {
+      return buildSeedContent();
+    }
+  }
+
+  private loadReviews(): AdminReview[] {
+    try {
+      const raw = localStorage.getItem(REVIEWS_KEY);
+      return raw ? JSON.parse(raw) : buildSeedReviews();
+    } catch {
+      return buildSeedReviews();
+    }
+  }
+
+  private loadSettings(): BusinessSettings {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      return raw ? JSON.parse(raw) : buildSeedSettings();
+    } catch {
+      return buildSeedSettings();
+    }
+  }
+
   private saveRooms() {
     try { localStorage.setItem(ROOMS_KEY, JSON.stringify(this.rooms())); } catch { /* ignore */ }
   }
@@ -354,5 +447,13 @@ export class AdminDataService {
 
   private saveTrips() {
     try { localStorage.setItem(TRIPS_KEY, JSON.stringify(this.trips())); } catch { /* ignore */ }
+  }
+
+  private saveContent() {
+    try { localStorage.setItem(CONTENT_KEY, JSON.stringify(this.content())); } catch { /* ignore */ }
+  }
+
+  private saveReviews() {
+    try { localStorage.setItem(REVIEWS_KEY, JSON.stringify(this.reviews())); } catch { /* ignore */ }
   }
 }

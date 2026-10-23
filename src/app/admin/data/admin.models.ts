@@ -63,6 +63,45 @@ export interface AdminTrip {
   departures: TripDeparture[];
 }
 
+export interface GalleryPhoto {
+  id: string;
+  src: string;
+  alt: string;
+}
+
+export type ReviewStatus = 'Pending' | 'Approved' | 'Hidden';
+
+export interface AdminReview {
+  id: string;
+  name: string;
+  rating: number;
+  stay: string;
+  text: string;
+  date: string;
+  status: ReviewStatus;
+}
+
+export interface SiteContent {
+  heroTagline: string;
+  aboutHeading: string;
+  aboutText: string;
+  gallery: GalleryPhoto[];
+}
+
+export interface BusinessSettings {
+  name: string;
+  tagline: string;
+  phone: string;
+  whatsapp: string;
+  email: string;
+  address: string;
+  instagram: string;
+  facebook: string;
+  checkInTime: string;
+  checkOutTime: string;
+  cancellationPolicy: string;
+}
+
 /**
  * Half-open date range check: [aFrom, aTo) overlaps [bFrom, bTo).
  * Allows a new guest to check in on the exact day the previous guest checks out.

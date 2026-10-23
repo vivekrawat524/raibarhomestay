@@ -1,0 +1,74 @@
+<section class="cnt">
+  <h2>Website Content &amp; Reviews</h2>
+  <p class="sub">Update homepage text, manage gallery photos, and approve guest reviews.</p>
+
+  @if (feedback()) {
+    <p class="msg-bar">{{ feedback() }}</p>
+  }
+
+  <!-- 1. Homepage & About Text -->
+  <form class="panel" (ngSubmit)="saveText()">
+    <h3>1. Homepage Text</h3>
+    <div class="grid-2">
+      <div>
+        <label for="hTag">HERO TAGLINE</label>
+        <input id="hTag" class="in" name="heroTagline" [(ngModel)]="textForm.heroTagline">
+      </div>
+      <div>
+        <label for="aHead">ABOUT SECTION HEADING</label>
+        <input id="aHead" class="in" name="aboutHeading" [(ngModel)]="textForm.aboutHeading">
+      </div>
+    </div>
+    <div>
+      <label for="aTxt">ABOUT DESCRIPTION</label>
+      <textarea id="aTxt" class="in" name="aboutText" [(ngModel)]="textForm.aboutText"></textarea>
+    </div>
+    <div class="foot">
+      <button class="btn" type="submit">Save Homepage Text</button>
+    </div>
+  </form>
+
+  <!-- 2. Gallery Photos -->
+  <div class="panel">
+    <h3>2. Gallery Photos ({{ data.content().gallery.length }})</h3>
+
+    <form class="add-row" (ngSubmit)="addPhoto()">
+      <input class="in" name="src" [(ngModel)]="newPhoto.src" placeholder="Image path (e.g. images/p1.png)" required>
+      <input class="in" name="alt" [(ngModel)]="newPhoto.alt" placeholder="Caption (e.g. Sunset terrace)">
+      <button class="btn" type="submit">+ Add Photo</button>
+    </form>
+
+    <div class="gal-grid">
+      @for (g of data.content().gallery; track g.id) {
+        <div class="gal-item">
+          <img [src]="g.src" [alt]="g.alt">
+          <div class="gal-bar">
+            <small>{{ g.alt }}</small>
+            <button type="button" (click)="removePhoto(g.id)">Remove</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- 3. Guest Reviews Moderation -->
+  <div class="panel">
+    <h3>3. Guest Reviews Moderation ({{ data.reviews().length }})</h3>
+
+    <div class="rev-list">
+      @for (r of data.reviews(); track r.id) {
+        <div class="rev-item">
+          <div>
+            <strong>{{ r.name }} · {{ '★'.repeat(r.rating) }} <span class="badge" [attr.data-st]="r.status">{{ r.status }}</span></strong>
+            <p>"{{ r.text }}"</p>
+            <small>{{ r.stay }} · {{ r.date }}</small>
+          </div>
+          <div class="acts">
+            <button class="act ok" type="button" (click)="setReview(r.id, 'Approved')">Approve</button>
+            <button class="act no" type="button" (click)="setReview(r.id, 'Hidden')">Hide</button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

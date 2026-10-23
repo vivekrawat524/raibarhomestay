@@ -1,0 +1,27 @@
+<section class="pay">
+  <h2>Payments &amp; Financial Reports</h2>
+  <p class="sub">Summary of booking values and upcoming payment tracking module.</p>
+
+  <div class="cards">
+    <div class="card">
+      <span>Confirmed / Active Booking Value</span>
+      <strong>₹{{ confirmedRevenue() }}</strong>
+      <small>Across Confirmed, Checked-In &amp; Checked-Out stays</small>
+    </div>
+    <div class="card">
+      <span>Pending Enquiries Value</span>
+      <strong>₹{{ pendingValue() }}</strong>
+      <small>Awaiting owner confirmation</small>
+    </div>
+  </div>
+
+  <div class="placeholder-box">
+    <span class="pill">Planned for Phase 8</span>
+    <h3>Payment Gateway &amp; Ledger — Coming Soon</h3>
+    <p>
+      As agreed in the development plan, online payment gateway integration, cash/UPI advance recording,
+      balance-due tracking, and downloadable monthly CSV reports will be activated once your client's
+      payment workflow is finalized.
+    </p>
+  </div>
+</section>

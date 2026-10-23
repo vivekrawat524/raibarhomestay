@@ -1,0 +1,82 @@
+<section class="set">
+  <h2>Business Settings</h2>
+  <p class="sub">Manage homestay contact details, check-in/out timings, social links and house policies.</p>
+
+  @if (feedback()) {
+    <p class="msg-bar">{{ feedback() }}</p>
+  }
+
+  <form class="panel" (ngSubmit)="save()">
+    <h3>Homestay Profile &amp; Contact Information</h3>
+
+    <div class="grid-2">
+      <div>
+        <label for="sName">BUSINESS NAME</label>
+        <input id="sName" class="in" name="name" [(ngModel)]="form.name" required>
+      </div>
+      <div>
+        <label for="sTag">TAGLINE</label>
+        <input id="sTag" class="in" name="tagline" [(ngModel)]="form.tagline">
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div>
+        <label for="sPhone">PHONE NUMBER</label>
+        <input id="sPhone" class="in" name="phone" [(ngModel)]="form.phone">
+      </div>
+      <div>
+        <label for="sWa">WHATSAPP (DIGITS ONLY)</label>
+        <input id="sWa" class="in" name="whatsapp" [(ngModel)]="form.whatsapp">
+      </div>
+      <div>
+        <label for="sMail">EMAIL ADDRESS</label>
+        <input id="sMail" class="in" type="email" name="email" [(ngModel)]="form.email">
+      </div>
+    </div>
+
+    <div>
+      <label for="sAddr">FULL ADDRESS</label>
+      <input id="sAddr" class="in" name="address" [(ngModel)]="form.address">
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label for="sIn">CHECK-IN TIME</label>
+        <input id="sIn" class="in" name="checkInTime" [(ngModel)]="form.checkInTime">
+      </div>
+      <div>
+        <label for="sOut">CHECK-OUT TIME</label>
+        <input id="sOut" class="in" name="checkOutTime" [(ngModel)]="form.checkOutTime">
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label for="sIg">INSTAGRAM URL</label>
+        <input id="sIg" class="in" name="instagram" [(ngModel)]="form.instagram">
+      </div>
+      <div>
+        <label for="sFb">FACEBOOK URL</label>
+        <input id="sFb" class="in" name="facebook" [(ngModel)]="form.facebook">
+      </div>
+    </div>
+
+    <div>
+      <label for="sPol">CANCELLATION POLICY / HOUSE RULES</label>
+      <textarea id="sPol" class="in" name="cancellationPolicy" [(ngModel)]="form.cancellationPolicy"></textarea>
+    </div>
+
+    <div class="foot">
+      <button class="btn" type="submit">Save Settings</button>
+    </div>
+  </form>
+
+  <div class="panel reset-panel">
+    <div>
+      <h3>Reset Prototype Demo Data</h3>
+      <p>Restore the original 5 rooms, 3 travel packages, and sample bookings in this browser.</p>
+    </div>
+    <button class="reset-btn" type="button" (click)="resetDemo()">Reset Demo Data</button>
+  </div>
+</section>

@@ -18,16 +18,16 @@ export class AdminShellComponent {
 
   /** on phones the sidebar is hidden until the ☰ button is pressed */
   menuOpen = signal(false);
-
   nav: NavItem[] = [
     { label: 'Dashboard', icon: '📊', path: 'dashboard', ready: true },
     { label: 'Bookings',  icon: '📅', path: 'bookings',  ready: true },
-    { label: 'Rooms',     icon: '🛏️', path: 'rooms',     ready: true},
-    { label: 'Trips',     icon: '🏔️', path: 'trips',     ready: true},
-    { label: 'Website',   icon: '🖼️', path: 'content',   ready: false },
-    { label: 'Payments',  icon: '💳', path: 'payments',  ready: false },
-    { label: 'Settings',  icon: '⚙️', path: 'settings',  ready: false }
+    { label: 'Rooms',     icon: '🛏️', path: 'rooms',     ready: true },
+    { label: 'Trips',     icon: '🏔️', path: 'trips',     ready: true },
+    { label: 'Website',   icon: '🖼️', path: 'content',   ready: true },
+    { label: 'Payments',  icon: '💳', path: 'payments',  ready: true },
+    { label: 'Settings',  icon: '⚙️', path: 'settings',  ready: true }
   ];
+ 
 
   toggle() { this.menuOpen.update(open => !open); }
   close() { this.menuOpen.set(false); }
