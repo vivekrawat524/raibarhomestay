@@ -1,90 +1,104 @@
 <section class="bk">
+  <!-- TOP HEADER WITH 2-PAGE SWITCHER: ROOM BOOKING | TRIP BOOKING -->
   <div class="head">
     <div>
-      <h2>Bookings Management</h2>
-      <p class="sub">Confirm requests, assign rooms, check guests in or out, and add phone/walk-in bookings.</p>
+      <h2>{{ pageMode() === 'room' ? 'Room Bookings' : 'Trip Bookings' }}</h2>
+      <p class="sub">Ordered newest first (ID ↓). Click any guest name to view complete details.</p>
     </div>
-    <button class="btn" type="button" (click)="showNewForm.set(!showNewForm())">
-      {{ showNewForm() ? '✕ Close Form' : '+ New Booking' }}
-    </button>
+
+    <div class="head-right">
+      <div class="page-switch">
+        <button
+          type="button"
+          class="sw-btn"
+          [class.active]="pageMode() === 'room'"
+          (click)="switchPage('room')">
+          🛏️ Room Booking
+        </button>
+        <button
+          type="button"
+          class="sw-btn"
+          [class.active]="pageMode() === 'trip'"
+          (click)="switchPage('trip')">
+          🚐 Trip Booking
+        </button>
+      </div>
+
+      <button class="btn" type="button" (click)="showNewForm.set(!showNewForm())">
+        {{ showNewForm() ? '✕ Close Form' : (pageMode() === 'room' ? '+ New Room Booking' : '+ New Trip Booking') }}
+      </button>
+    </div>
   </div>
 
   @if (feedback(); as fb) {
     <p class="msg-bar" [class.err]="fb.isError">{{ fb.text }}</p>
   }
 
-  <!-- Collapsible Manual Booking Form -->
-  @if (showNewForm()) {
-    <form class="new-card" (ngSubmit)="submitNewBooking()">
-      <h3>Add Manual Booking (Phone / WhatsApp / Walk-In)</h3>
-
+  <!-- MANUAL ROOM BOOKING FORM (WHEN IN ROOM MODE) -->
+  @if (showNewForm() && pageMode() === 'room') {
+    <form class="new-card" (ngSubmit)="submitNewRoomBooking()">
+      <h3>Add Manual Room Booking</h3>
       <div class="grid-3">
-        <div>
-          <label for="gName">GUEST NAME *</label>
-          <input id="gName" class="in" name="guestName" [(ngModel)]="form.guestName" placeholder="Full name" required>
-        </div>
-        <div>
-          <label for="gPhone">PHONE NUMBER *</label>
-          <input id="gPhone" class="in" name="phone" [(ngModel)]="form.phone" placeholder="+91 98..." required>
-        </div>
-        <div>
-          <label for="gEmail">EMAIL (OPTIONAL)</label>
-          <input id="gEmail" class="in" name="email" [(ngModel)]="form.email" placeholder="guest@email.com">
-        </div>
+        <div><label>GUEST NAME *</label><input class="in" name="guestName" [(ngModel)]="form.guestName" placeholder="Full name" required></div>
+        <div><label>PHONE NUMBER *</label><input class="in" name="phone" [(ngModel)]="form.phone" placeholder="+91 98..." required></div>
+        <div><label>EMAIL</label><input class="in" name="email" [(ngModel)]="form.email" placeholder="guest@email.com"></div>
       </div>
-
       <div class="grid-4">
         <div>
-          <label for="gRoom">ROOM</label>
-          <select id="gRoom" class="in" name="roomId" [(ngModel)]="form.roomId">
-            @for (r of data.rooms(); track r.id) {
-              <option [ngValue]="r.id">{{ r.name }} (₹{{ r.price }}/night)</option>
-            }
+          <label>ROOM</label>
+          <select class="in" name="roomId" [(ngModel)]="form.roomId">
+            @for (r of data.rooms(); track r.id) { <option [ngValue]="r.id">{{ r.name }} (₹{{ r.price }}/night)</option> }
           </select>
         </div>
-        <div>
-          <label for="gIn">CHECK-IN DATE</label>
-          <input id="gIn" class="in" type="date" name="checkIn" [(ngModel)]="form.checkIn" required>
-        </div>
-        <div>
-          <label for="gOut">CHECK-OUT DATE</label>
-          <input id="gOut" class="in" type="date" name="checkOut" [(ngModel)]="form.checkOut" required>
-        </div>
-        <div>
-          <label for="gGuests">GUESTS</label>
-          <input id="gGuests" class="in" type="number" min="1" max="8" name="guests" [(ngModel)]="form.guests">
-        </div>
+        <div><label>CHECK-IN DATE</label><input class="in" type="date" name="checkIn" [(ngModel)]="form.checkIn" required></div>
+        <div><label>CHECK-OUT DATE</label><input class="in" type="date" name="checkOut" [(ngModel)]="form.checkOut" required></div>
+        <div><label>GUESTS</label><input class="in" type="number" min="1" max="8" name="guests" [(ngModel)]="form.guests"></div>
       </div>
-
       <div class="grid-3">
         <div>
-          <label for="gSource">BOOKING SOURCE</label>
-          <select id="gSource" class="in" name="source" [(ngModel)]="form.source">
-            @for (s of sources; track s) {
-              <option [ngValue]="s">{{ s }}</option>
-            }
+          <label>BOOKING SOURCE</label>
+          <select class="in" name="source" [(ngModel)]="form.source">
+            @for (s of sources; track s) { <option [ngValue]="s">{{ s }}</option> }
           </select>
         </div>
         <div>
-          <label for="gStatus">INITIAL STATUS</label>
-          <select id="gStatus" class="in" name="status" [(ngModel)]="form.status">
-            <option value="Confirmed">Confirmed (blocks room immediately)</option>
-            <option value="Pending">Pending (request only)</option>
+          <label>INITIAL STATUS</label>
+          <select class="in" name="status" [(ngModel)]="form.status">
+            <option value="Confirmed">Confirmed</option>
+            <option value="Pending">Pending</option>
           </select>
         </div>
-        <div>
-          <label for="gNote">SPECIAL NOTE</label>
-          <input id="gNote" class="in" name="note" [(ngModel)]="form.note" placeholder="Arrival time, food preference...">
-        </div>
+        <div><label>SPECIAL NOTE</label><input class="in" name="note" [(ngModel)]="form.note" placeholder="Arrival time, food preference..."></div>
       </div>
-
-      <div class="form-foot">
-        <button class="btn" type="submit">Save Booking</button>
-      </div>
+      <div class="form-foot"><button class="btn" type="submit">Save Room Booking</button></div>
     </form>
   }
 
-  <!-- Filters & Search -->
+  <!-- MANUAL TRIP BOOKING FORM (WHEN IN TRIP MODE) -->
+  @if (showNewForm() && pageMode() === 'trip') {
+    <form class="new-card" (ngSubmit)="submitNewTripBooking()">
+      <h3>Add Manual Trip Booking</h3>
+      <div class="grid-3">
+        <div><label>GUEST NAME *</label><input class="in" name="tGuestName" [(ngModel)]="tripForm.guestName" placeholder="Full name" required></div>
+        <div><label>PHONE NUMBER *</label><input class="in" name="tPhone" [(ngModel)]="tripForm.phone" placeholder="+91 98..." required></div>
+        <div><label>EMAIL</label><input class="in" name="tEmail" [(ngModel)]="tripForm.email" placeholder="guest@email.com"></div>
+      </div>
+      <div class="grid-4">
+        <div>
+          <label>TRIP PACKAGE</label>
+          <select class="in" name="tripId" [(ngModel)]="tripForm.tripId">
+            @for (t of data.trips(); track t.id) { <option [ngValue]="t.id">{{ t.title }} (₹{{ t.price }}/person)</option> }
+          </select>
+        </div>
+        <div><label>START DATE</label><input class="in" type="date" name="startDate" [(ngModel)]="tripForm.startDate" required></div>
+        <div><label>OPTIONAL TEMPLES</label><input class="in" name="optionalTemples" [(ngModel)]="tripForm.optionalTemples" placeholder="e.g. Tarakund, Deeba"></div>
+        <div><label>TRAVELLERS</label><input class="in" type="number" min="1" max="20" name="travellers" [(ngModel)]="tripForm.travellers"></div>
+      </div>
+      <div class="form-foot"><button class="btn" type="submit">Save Trip Booking</button></div>
+    </form>
+  }
+
+  <!-- FILTERS & SEARCH -->
   <div class="toolbar">
     <div class="tabs">
       @for (st of statuses; track st) {
@@ -93,7 +107,7 @@
           class="tab"
           [class.active]="statusFilter() === st"
           (click)="statusFilter.set(st)">
-          {{ st }}
+          {{ statusLabel(st) }}
         </button>
       }
     </div>
@@ -101,79 +115,239 @@
     <input
       class="in search"
       type="search"
-      placeholder="Search guest, phone or ID..."
+      placeholder="Search guest, phone, email or ID..."
       [ngModel]="search()"
       (ngModelChange)="search.set($event)">
   </div>
 
-  <!-- Bookings List -->
-  @if (filteredBookings().length === 0) {
-    <div class="empty-card">No bookings match your current filter.</div>
-  } @else {
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID &amp; Source</th>
-            <th>Guest</th>
-            <th>Dates &amp; Nights</th>
-            <th>Assigned Room</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (b of filteredBookings(); track b.id) {
+  <!-- ========================================================= -->
+  <!-- PAGE 1: ROOM BOOKING TABLE                                -->
+  <!-- ========================================================= -->
+  @if (pageMode() === 'room') {
+    @if (filteredRoomBookings().length === 0) {
+      <div class="empty-card">No room bookings match your current filter.</div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
             <tr>
-              <td>
-                <strong>{{ b.id }}</strong>
-                <span class="src">{{ b.source }}</span>
-              </td>
-              <td>
-                <strong>{{ b.guestName }}</strong>
-                <small>{{ b.guests }} guests · <a [href]="waLink(b.phone, b.guestName)" target="_blank" rel="noopener">💬 {{ b.phone }}</a></small>
-                @if (b.note) {
-                  <small class="note">"{{ b.note }}"</small>
-                }
-              </td>
-              <td>
-                <span>{{ b.checkIn }} → {{ b.checkOut }}</span>
-                <small>{{ nights(b.checkIn, b.checkOut) }} night(s)</small>
-              </td>
-              <td>
-                <select
-                  class="room-select"
-                  [ngModel]="b.roomId"
-                  (ngModelChange)="changeRoom(b.id, $event)">
-                  @for (r of data.rooms(); track r.id) {
-                    <option [ngValue]="r.id">{{ r.name }}</option>
-                  }
-                </select>
-              </td>
-              <td class="price">₹{{ b.total }}</td>
-              <td>
-                <span class="status" [attr.data-status]="b.status">{{ b.status }}</span>
-              </td>
-              <td>
-                <div class="acts">
-                  @if (b.status === 'Pending') {
-                    <button class="act ok" type="button" (click)="setStatus(b.id, 'Confirmed')">Confirm</button>
-                    <button class="act no" type="button" (click)="setStatus(b.id, 'Rejected')">Reject</button>
-                  }
-                  @if (b.status === 'Confirmed') {
-                    <button class="act in-btn" type="button" (click)="setStatus(b.id, 'CheckedIn')">Check In</button>
-                    <button class="act no" type="button" (click)="setStatus(b.id, 'Cancelled')">Cancel</button>
-                  }
-                  @if (b.status === 'CheckedIn') {
-                    <button class="act out-btn" type="button" (click)="setStatus(b.id, 'CheckedOut')">Check Out</button>
-                  }
-                </div>
-              </td>
+              <th>ID ↓</th>
+              <th>Guest</th>
+              <th class="center">Guests</th>
+              <th>Email</th>
+              <th>Contact</th>
+              <th>Reservation Date</th>
+              <th>Check-In</th>
+              <th>Check-Out</th>
+              <th class="center">Nights</th>
+              <th>Assign Room</th>
+              <th>Total / Payment</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (b of filteredRoomBookings(); track b.id) {
+              <tr>
+                <!-- ONLY ID AND GUEST NAME ARE BOLD -->
+                <td class="bold-cell">{{ b.id }}</td>
+                <td>
+                  <button type="button" class="guest-btn" (click)="openRoomCustomer(b.id)">
+                    {{ b.guestName }}
+                  </button>
+                </td>
+                <td class="center">{{ b.guests }}</td>
+                <td>{{ b.email || '—' }}</td>
+                <td><a class="plain-link" [href]="'tel:' + b.phone">{{ b.phone }}</a></td>
+                <td>{{ formatDate(b.createdAt) }}</td>
+                <td>{{ formatDate(b.checkIn) }}</td>
+                <td>{{ formatDate(b.checkOut) }}</td>
+                <td class="center">{{ nights(b.checkIn, b.checkOut) }}</td>
+                <td>
+                  <select
+                    class="room-select"
+                    [ngModel]="b.roomId"
+                    (ngModelChange)="changeRoom(b.id, $event)">
+                    @for (r of data.rooms(); track r.id) {
+                      <option [ngValue]="r.id">{{ r.name }}</option>
+                    }
+                  </select>
+                </td>
+                <td>
+                  <div class="pay-cell">
+                    <span>₹{{ b.total }}</span>
+                    <span class="pay-badge" [class.paid]="b.paymentStatus === 'Paid'">
+                      {{ b.paymentStatus === 'Paid' ? 'Paid ✓' : 'Unpaid' }}
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status" [attr.data-status]="b.status">{{ statusLabel(b.status) }}</span>
+                </td>
+                <td>
+                  <div class="acts">
+                    @if (b.status === 'Pending') {
+                      <button class="act ok" type="button" (click)="setStatus(b.id, 'Confirmed')">Accept</button>
+                      <button class="act no" type="button" (click)="setStatus(b.id, 'Rejected')">Reject</button>
+                    } @else if (b.status === 'Confirmed') {
+                      <button class="act in-btn" type="button" (click)="setStatus(b.id, 'CheckedIn')">Check In</button>
+                      @if (b.paymentStatus !== 'Paid') {
+                        <button class="act pay-btn" type="button" (click)="markPaid(b.id)">Mark Paid</button>
+                      }
+                      <button class="act no" type="button" (click)="setStatus(b.id, 'Cancelled')">Cancel</button>
+                    } @else if (b.status === 'CheckedIn') {
+                      <button class="act out-btn" type="button" (click)="setStatus(b.id, 'CheckedOut')">Check Out</button>
+                      @if (b.paymentStatus !== 'Paid') {
+                        <button class="act pay-btn" type="button" (click)="markPaid(b.id)">Mark Paid</button>
+                      }
+                    } @else if (b.status === 'CheckedOut') {
+                      <span class="done-txt">Completed</span>
+                    } @else {
+                      <button class="act restore-btn" type="button" (click)="setStatus(b.id, 'Confirmed')">Restore</button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- ========================================================= -->
+  <!-- PAGE 2: TRIP BOOKING TABLE                                -->
+  <!-- ========================================================= -->
+  @if (pageMode() === 'trip') {
+    @if (filteredTripBookings().length === 0) {
+      <div class="empty-card">No trip bookings match your current filter.</div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID ↓</th>
+              <th>Guest</th>
+              <th class="center">Guests</th>
+              <th>Email</th>
+              <th>Contact</th>
+              <th>Reservation Date</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Trip Package</th>
+              <th>Total / Payment</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (tb of filteredTripBookings(); track tb.id) {
+              <tr>
+                <!-- ONLY ID AND GUEST NAME ARE BOLD -->
+                <td class="bold-cell">{{ tb.id }}</td>
+                <td>
+                  <button type="button" class="guest-btn" (click)="openTripCustomer(tb.id)">
+                    {{ tb.guestName }}
+                  </button>
+                </td>
+                <td class="center">{{ tb.travellers }}</td>
+                <td>{{ tb.email || '—' }}</td>
+                <td><a class="plain-link" [href]="'tel:' + tb.phone">{{ tb.phone }}</a></td>
+                <td>{{ formatDate(tb.createdAt) }}</td>
+                <td>{{ formatDate(tb.startDate) }}</td>
+                <td>{{ formatDate(tb.endDate) }}</td>
+                <td>{{ tb.tripTitle }}</td>
+                <td>
+                  <div class="pay-cell">
+                    <span>₹{{ tb.total }}</span>
+                    <span class="pay-badge" [class.paid]="tb.paymentStatus === 'Paid'">
+                      {{ tb.paymentStatus === 'Paid' ? 'Paid ✓' : 'Unpaid' }}
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <span class="status" [attr.data-status]="tb.status">{{ statusLabel(tb.status) }}</span>
+                </td>
+                <td>
+                  <div class="acts">
+                    @if (tb.status === 'Pending') {
+                      <button class="act ok" type="button" (click)="setTripStatus(tb.id, 'Confirmed')">Accept</button>
+                      <button class="act no" type="button" (click)="setTripStatus(tb.id, 'Rejected')">Reject</button>
+                    } @else if (tb.status === 'Confirmed') {
+                      <button class="act in-btn" type="button" (click)="setTripStatus(tb.id, 'CheckedIn')">Start Trip</button>
+                      @if (tb.paymentStatus !== 'Paid') {
+                        <button class="act pay-btn" type="button" (click)="markTripPaid(tb.id)">Mark Paid</button>
+                      }
+                      <button class="act no" type="button" (click)="setTripStatus(tb.id, 'Cancelled')">Cancel</button>
+                    } @else if (tb.status === 'CheckedIn') {
+                      <button class="act out-btn" type="button" (click)="setTripStatus(tb.id, 'CheckedOut')">Complete</button>
+                    } @else if (tb.status === 'CheckedOut') {
+                      <span class="done-txt">Completed</span>
+                    } @else {
+                      <button class="act restore-btn" type="button" (click)="setTripStatus(tb.id, 'Confirmed')">Restore</button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- ROOM CUSTOMER MODAL -->
+  @if (activeRoomBooking(); as b) {
+    <div class="modal-backdrop" (click)="closeCustomer()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div><span class="eye">ROOM BOOKING · {{ b.id }}</span><h3>{{ b.guestName }}</h3></div>
+          <button type="button" class="close-btn" (click)="closeCustomer()">✕</button>
+        </div>
+        <div class="detail-grid">
+          <div class="d-item"><span>Customer Name</span><strong>{{ b.guestName }}</strong></div>
+          <div class="d-item"><span>Phone Number</span><span>{{ b.phone }}</span></div>
+          <div class="d-item"><span>Email Address</span><span>{{ b.email || 'Not provided' }}</span></div>
+          <div class="d-item"><span>Total Guests</span><span>{{ b.guests }}</span></div>
+          <div class="d-item"><span>Assigned Room</span><span>{{ roomName(b.roomId) }} (₹{{ roomPrice(b.roomId) }}/night)</span></div>
+          <div class="d-item"><span>Reservation Date</span><span>{{ formatDate(b.createdAt) }} ({{ b.source }})</span></div>
+          <div class="d-item"><span>Check-In Date</span><span>{{ formatDate(b.checkIn) }}</span></div>
+          <div class="d-item"><span>Check-Out Date</span><span>{{ formatDate(b.checkOut) }} ({{ nights(b.checkIn, b.checkOut) }} nights)</span></div>
+          <div class="d-item"><span>Booking Status</span><span>{{ statusLabel(b.status) }}</span></div>
+          <div class="d-item"><span>Payment Status</span><span>{{ b.paymentStatus === 'Paid' ? 'Paid ✓' : 'Unpaid' }}</span></div>
+          <div class="d-item"><span>Total Amount</span><span>₹{{ b.total }}</span></div>
+          <div class="d-item"><span>Payment Method</span><span>{{ b.paymentMethod || 'Pending (/pay/' + b.id + ')' }}</span></div>
+        </div>
+        @if (b.note) { <div class="note-box"><span>Special Note:</span><p>"{{ b.note }}"</p></div> }
+        <div class="modal-foot"><button type="button" class="act" (click)="closeCustomer()">Close</button></div>
+      </div>
+    </div>
+  }
+
+  <!-- TRIP CUSTOMER MODAL -->
+  @if (activeTripBooking(); as tb) {
+    <div class="modal-backdrop" (click)="closeCustomer()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div><span class="eye">TRIP BOOKING · {{ tb.id }}</span><h3>{{ tb.guestName }}</h3></div>
+          <button type="button" class="close-btn" (click)="closeCustomer()">✕</button>
+        </div>
+        <div class="detail-grid">
+          <div class="d-item"><span>Customer Name</span><strong>{{ tb.guestName }}</strong></div>
+          <div class="d-item"><span>Phone Number</span><span>{{ tb.phone }}</span></div>
+          <div class="d-item"><span>Email Address</span><span>{{ tb.email || 'Not provided' }}</span></div>
+          <div class="d-item"><span>Total Guests</span><span>{{ tb.travellers }}</span></div>
+          <div class="d-item"><span>Trip Package</span><span>{{ tb.tripTitle }}</span></div>
+          <div class="d-item"><span>Optional Temples</span><span>{{ tb.optionalTemples || 'None' }}</span></div>
+          <div class="d-item"><span>Reservation Date</span><span>{{ formatDate(tb.createdAt) }}</span></div>
+          <div class="d-item"><span>Trip Dates</span><span>{{ formatDate(tb.startDate) }} → {{ formatDate(tb.endDate) }}</span></div>
+          <div class="d-item"><span>Booking Status</span><span>{{ statusLabel(tb.status) }}</span></div>
+          <div class="d-item"><span>Payment Status</span><span>{{ tb.paymentStatus === 'Paid' ? 'Paid ✓' : 'Unpaid' }}</span></div>
+          <div class="d-item"><span>Total Amount</span><span>₹{{ tb.total }}</span></div>
+          <div class="d-item"><span>Payment Method</span><span>{{ tb.paymentMethod || 'Pending' }}</span></div>
+        </div>
+        <div class="modal-foot"><button type="button" class="act" (click)="closeCustomer()">Close</button></div>
+      </div>
     </div>
   }
 </section>

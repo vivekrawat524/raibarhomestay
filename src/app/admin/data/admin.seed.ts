@@ -1,5 +1,5 @@
 import { GALLERY, SITE } from '../../core/site.data';
-import { AdminBooking, AdminReview, AdminRoom, AdminTrip, BusinessSettings, SiteContent } from './admin.models';
+import { AdminBooking, AdminReview, AdminRoom, AdminTrip, AdminTripBooking, BusinessSettings, SiteContent } from './admin.models';
 
 /** Helper to get YYYY-MM-DD offset by N days from today */
 export function dayOffset(days: number): string {
@@ -117,13 +117,14 @@ export function buildSeedTrips(): AdminTrip[] {
 }
 
 /** Sample bookings relative to today so the dashboard always has realistic activity */
+/** Sample bookings starting from BK-1 relative to today */
 export function buildSeedBookings(): AdminBooking[] {
   const today = dayOffset(0);
   return [
     {
-      id: 'BK-101',
+      id: 'BK-1',
       guestName: 'Amit Sharma',
-      phone: '+919811122233',
+      phone: '+91 98111 22233',
       email: 'amit@example.com',
       guests: 2,
       roomId: 1,
@@ -133,12 +134,15 @@ export function buildSeedBookings(): AdminBooking[] {
       source: 'Website',
       note: 'Arriving around 2 PM',
       total: 2000,
-      createdAt: dayOffset(-2)
+      createdAt: dayOffset(-2),
+      paymentStatus: 'Paid',
+      paymentMethod: 'UPI (GPay / PhonePe / Paytm)'
     },
     {
-      id: 'BK-102',
+      id: 'BK-2',
       guestName: 'Priya Rawat',
-      phone: '+919822233344',
+      phone: '+91 98222 33344',
+      email: 'priya@example.com',
       guests: 2,
       roomId: 2,
       checkIn: dayOffset(-2),
@@ -147,12 +151,14 @@ export function buildSeedBookings(): AdminBooking[] {
       source: 'WhatsApp',
       note: 'Morning tea requested at 7 AM',
       total: 2000,
-      createdAt: dayOffset(-5)
+      createdAt: dayOffset(-5),
+      paymentStatus: 'Paid',
+      paymentMethod: 'UPI (GPay / PhonePe / Paytm)'
     },
     {
-      id: 'BK-103',
+      id: 'BK-3',
       guestName: 'Rohan Negi',
-      phone: '+919833344455',
+      phone: '+91 98333 44455',
       email: 'rohan@example.com',
       guests: 3,
       roomId: 3,
@@ -162,12 +168,14 @@ export function buildSeedBookings(): AdminBooking[] {
       source: 'Website',
       note: 'Interested in the 2-Day Road Trip as well',
       total: 4500,
-      createdAt: today
+      createdAt: today,
+      paymentStatus: 'Unpaid'
     },
     {
-      id: 'BK-104',
+      id: 'BK-4',
       guestName: 'Neha Joshi',
-      phone: '+919844455566',
+      phone: '+91 98444 55566',
+      email: 'neha@example.com',
       guests: 4,
       roomId: 5,
       checkIn: dayOffset(3),
@@ -175,6 +183,59 @@ export function buildSeedBookings(): AdminBooking[] {
       status: 'Pending',
       source: 'WhatsApp',
       total: 3600,
+      createdAt: today,
+      paymentStatus: 'Unpaid'
+    }
+  ];
+}
+/** Sample trip bookings starting from TB-1 relative to today */
+export function buildSeedTripBookings(): AdminTripBooking[] {
+  const today = dayOffset(0);
+  return [
+    {
+      id: 'TB-1',
+      guestName: 'Vikram Gusain',
+      phone: '+91 98110 44556',
+      travellers: 4,
+      tripId: 1,
+      tripTitle: '2-Day Road Trip',
+      startDate: today,
+      endDate: dayOffset(1),
+      optionalTemples: 'Tarakund',
+      status: 'Confirmed',
+      paymentStatus: 'Paid',
+      paymentMethod: 'UPI (GPay / PhonePe / Paytm)',
+      total: 11996,
+      createdAt: dayOffset(-2)
+    },
+    {
+      id: 'TB-2',
+      guestName: 'Kavita Pant',
+      phone: '+91 98765 12340',
+      travellers: 2,
+      tripId: 2,
+      tripTitle: '5-Day Long Trip',
+      startDate: dayOffset(2),
+      endDate: dayOffset(6),
+      optionalTemples: 'Deeba, Binsar Mahadev',
+      status: 'Confirmed',
+      paymentStatus: 'AwaitingPayment',
+      total: 7998,
+      createdAt: dayOffset(-1)
+    },
+    {
+      id: 'TB-3',
+      guestName: 'Manoj Chauhan',
+      phone: '+91 97600 88991',
+      travellers: 3,
+      tripId: 3,
+      tripTitle: '7-Day Grand Trip',
+      startDate: dayOffset(5),
+      endDate: dayOffset(11),
+      optionalTemples: 'Binsar Mahadev',
+      status: 'Pending',
+      paymentStatus: 'Unpaid',
+      total: 14997,
       createdAt: today
     }
   ];

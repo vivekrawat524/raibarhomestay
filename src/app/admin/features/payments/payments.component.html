@@ -1,8 +1,13 @@
 <section class="pay">
   <h2>Payments &amp; Financial Reports</h2>
-  <p class="sub">Summary of booking values and upcoming payment tracking module.</p>
+  <p class="sub">Track customer payments completed via the website payment link (/pay/:id) and booking values.</p>
 
   <div class="cards">
+    <div class="card">
+      <span>Paid Revenue Collected</span>
+      <strong>₹{{ paidRevenue() }}</strong>
+      <small>Bookings paid by customers</small>
+    </div>
     <div class="card">
       <span>Confirmed / Active Booking Value</span>
       <strong>₹{{ confirmedRevenue() }}</strong>
@@ -16,12 +21,20 @@
   </div>
 
   <div class="placeholder-box">
-    <span class="pill">Planned for Phase 8</span>
-    <h3>Payment Gateway &amp; Ledger — Coming Soon</h3>
-    <p>
-      As agreed in the development plan, online payment gateway integration, cash/UPI advance recording,
-      balance-due tracking, and downloadable monthly CSV reports will be activated once your client's
-      payment workflow is finalized.
-    </p>
+    <h3>Booking Payment Ledger</h3>
+    @for (b of data.bookings(); track b.id) {
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px">
+        <div>
+          <strong>{{ b.id }} · {{ b.guestName }}</strong>
+          <small style="display:block;color:var(--mut)">{{ b.checkIn }} → {{ b.checkOut }} · {{ b.paymentMethod || 'Payment link: /pay/' + b.id }}</small>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <strong>₹{{ b.total }}</strong>
+          <a [href]="'/pay/' + b.id" target="_blank" rel="noopener" class="pill" style="margin:0">
+            {{ b.paymentStatus === 'Paid' ? 'Paid ✓' : 'Open Pay Page ↗' }}
+          </a>
+        </div>
+      </div>
+    }
   </div>
 </section>

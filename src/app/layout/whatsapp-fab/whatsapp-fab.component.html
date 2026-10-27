@@ -1,5 +1,70 @@
-<a class="fab" [href]="site.waLink" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M12.04 2a9.9 9.9 0 0 0-8.4 15.1L2 22l5-1.6A9.9 9.9 0 1 0 12.04 2Zm0 18.1a8.1 8.1 0 0 1-4.15-1.15l-.3-.18-2.97.95.97-2.9-.2-.3A8.1 8.1 0 1 1 12.04 20.1Zm4.45-6.06c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.32-.75-1.8-.2-.47-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.5.58.18 1.1.16 1.51.1.46-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z"/>
-  </svg>
-</a>
+<!-- FLOATING RAG AI CHAT WINDOW -->
+@if (isOpen()) {
+  <div class="rag-box">
+    <div class="rag-head">
+      <div>
+        <span class="rag-badge">✨ RAG AI CONCIERGE · LIVE DATA</span>
+        <h4>Raibar Homestay Assistant</h4>
+      </div>
+      <button type="button" class="rag-close" (click)="toggleChat()">✕</button>
+    </div>
+
+    <div class="rag-msgs">
+      @for (m of messages(); track $index) {
+        <div class="msg-row" [class.user]="m.role === 'user'">
+          <div class="bubble">
+            <p class="b-txt">{{ m.text }}</p>
+            @if (m.sources?.length) {
+              <div class="src-row">
+                <span class="src-lbl">📚 Retrieved:</span>
+                @for (s of m.sources; track s) {
+                  <span class="src-pill">{{ s }}</span>
+                }
+              </div>
+            }
+            @if (m.actionLink) {
+              <a class="act-link" [routerLink]="m.actionLink" (click)="isOpen.set(false)">
+                {{ m.actionLabel || 'Book Now →' }}
+              </a>
+            }
+          </div>
+        </div>
+      }
+      @if (isThinking()) {
+        <div class="msg-row">
+          <div class="bubble thinking">Retrieving live homestay data...</div>
+        </div>
+      }
+    </div>
+
+    <div class="quick-chips">
+      @for (p of quickPrompts; track p) {
+        <button type="button" class="chip" (click)="sendPrompt(p)">{{ p }}</button>
+      }
+    </div>
+
+    <form class="rag-input" (ngSubmit)="sendPrompt()">
+      <input
+        type="text"
+        name="ragQuery"
+        [(ngModel)]="query"
+        placeholder="Ask about rooms, 4 guests price, trips, food..."
+        autocomplete="off">
+      <button type="submit" [disabled]="isThinking()">Ask →</button>
+    </form>
+  </div>
+}
+
+<!-- FLOATING BUTTONS: RAG AI ASSISTANT + WHATSAPP -->
+<div class="fab-stack">
+  <button type="button" class="rag-fab" (click)="toggleChat()" aria-label="Ask Raibar AI Assistant">
+    <span class="sp">✨</span>
+    <span>{{ isOpen() ? 'Close AI' : 'Ask AI' }}</span>
+  </button>
+
+  <a class="fab" [href]="site.waLink" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12.04 2a9.9 9.9 0 0 0-8.4 15.1L2 22l5-1.6A9.9 9.9 0 1 0 12.04 2Zm0 18.1a8.1 8.1 0 0 1-4.15-1.15l-.3-.18-2.97.95.97-2.9-.2-.3A8.1 8.1 0 1 1 12.04 20.1Zm4.45-6.06c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.32-.75-1.8-.2-.47-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.5.58.18 1.1.16 1.51.1.46-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z"/>
+    </svg>
+  </a>
+</div>

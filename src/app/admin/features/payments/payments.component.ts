@@ -10,6 +10,12 @@ import { AdminDataService } from '../../data/admin-data.service';
 export class PaymentsComponent {
   data = inject(AdminDataService);
 
+  paidRevenue = computed(() =>
+    this.data.bookings()
+      .filter(b => b.paymentStatus === 'Paid')
+      .reduce((sum, b) => sum + b.total, 0)
+  );
+
   confirmedRevenue = computed(() =>
     this.data.bookings()
       .filter(b => b.status === 'Confirmed' || b.status === 'CheckedIn' || b.status === 'CheckedOut')

@@ -25,7 +25,7 @@
             <article class="card">
               <div class="top">
                 <span class="av">{{ initial(r.name) }}</span>
-                <div class="who"><b>{{ r.name }}</b><small>{{ r.stay }} · {{ fmt(r.date) }}@if (r.mine) { · {{ l.t('Your review','आपकी समीक्षा') }} }</small></div>
+                <div class="who"><b>{{ r.name }}</b><small>{{ r.stay }} · {{ fmt(r.date) }}</small></div>
                 <div class="stars sm">@for (s of stars; track s) { <span class="st" [class.on]="s <= r.rating">★</span> }</div>
               </div>
               <p>{{ r.text }}</p>
@@ -65,7 +65,11 @@
 
         <a class="cta" (click)="submit()">{{ l.t('SUBMIT REVIEW →','समीक्षा भेजें →') }}</a>
         @if (error()) { <p class="err">{{ error() }}</p> }
-        @if (done()) { <div class="msg">{{ l.t('Thank you! Your review has been received.','धन्यवाद! आपकी समीक्षा हमें मिल गई है।') }}</div> }
+        @if (done()) {
+          <div class="msg">
+            {{ l.t('Thank you! Your review has been sent to the admin for approval and will appear on the website once accepted.', 'धन्यवाद! आपकी समीक्षा व्यवस्थापक (एडमिन) के पास स्वीकृति के लिए भेज दी गई है और स्वीकार किए जाने के बाद वेबसाइट पर दिखाई देगी।') }}
+          </div>
+        }
       </div>
 
     </div>

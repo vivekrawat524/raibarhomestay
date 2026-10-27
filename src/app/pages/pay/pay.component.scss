@@ -1,0 +1,71 @@
+.methods {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.m-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  cursor: pointer;
+
+  &.active {
+    border-color: var(--gold);
+    background: var(--cream);
+  }
+}
+
+.paid-box {
+  margin-top: 14px;
+  padding: 28px;
+  border-radius: 18px;
+  background: #e6f4ea;
+  color: #14532d;
+
+  .paid-ic {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #14532d;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  p { margin-bottom: 6px; }
+  small { display: block; opacity: .85; margin-bottom: 18px; }
+}
+
+.paid-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.back-btn {
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: 1px solid #14532d;
+  font-size: 13px;
+  font-weight: 700;
+}

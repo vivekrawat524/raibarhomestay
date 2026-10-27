@@ -1,0 +1,80 @@
+<div class="page">
+  <div class="box dark photo">
+    <img class="hbg" [src]="room?.img || 'images/p5.jpeg'" alt="">
+    <div class="bh">
+      <div class="sh"><a class="back" routerLink="/">{{ l.t('← BACK TO HOME','← होम पर वापस') }}</a><app-lang-switch /></div>
+      <div class="eye">RAIBAR HOMESTAY · SECURE BOOKING PAYMENT</div>
+      <h1>{{ l.t('Complete Your Booking Payment','अपनी बुकिंग का भुगतान पूरा करें') }}</h1>
+      <p>{{ l.t('Review your confirmed stay details below and complete payment to lock in your reservation.','नीचे अपनी बुकिंग का विवरण देखें और अपना स्टे पक्का करने के लिए भुगतान करें।') }}</p>
+    </div>
+  </div>
+
+  <div class="box light pad-s">
+    <div class="bg">
+      @if (!booking) {
+        <div class="bf">
+          <h2>Booking Not Found</h2>
+          <p>We could not find booking <b>{{ bookingId }}</b> in this browser. Please check your payment link or contact us on WhatsApp.</p>
+          <a class="cta" routerLink="/book" style="margin-top:16px">← Go to Booking Page</a>
+        </div>
+      } @else {
+        <div class="bf">
+          <div class="k">BOOKING ID · {{ booking.id }}</div>
+          <h2>Hello, {{ booking.guestName }}</h2>
+
+          @if (booking.paymentStatus === 'Paid') {
+            <div class="paid-box">
+              <div class="paid-ic">✓</div>
+              <h3>Payment Completed — ₹{{ booking.total.toLocaleString('en-IN') }}</h3>
+              <p>Your reservation for <b>{{ room?.name }}</b> ({{ booking.checkIn }} → {{ booking.checkOut }}) is confirmed and marked as <b>Paid</b>.</p>
+              <small>Payment Method: {{ booking.paymentMethod || 'Online' }} · Date: {{ booking.paidAt }}</small>
+              <div class="paid-actions">
+                <a class="cta" [href]="adminReceiptWaUrl" target="_blank" rel="noopener">📲 Send Payment Receipt on WhatsApp →</a>
+                <a class="back-btn" routerLink="/">Back to Home</a>
+              </div>
+            </div>
+          } @else {
+            <p class="intro">Your booking request has been approved by the owner! Choose a payment method below to pay <b>₹{{ booking.total.toLocaleString('en-IN') }}</b>.</p>
+
+            <label>SELECT PAYMENT METHOD</label>
+            <div class="methods">
+              @for (m of methods; track m) {
+                <label class="m-card" [class.active]="method === m">
+                  <input type="radio" name="payMethod" [value]="m" [(ngModel)]="method">
+                  <span>{{ m }}</span>
+                </label>
+              }
+            </div>
+
+            <label for="upiRef">UPI ID / TRANSACTION NOTE (OPTIONAL)</label>
+            <input id="upiRef" class="in" [(ngModel)]="upiRef" placeholder="e.g. name@okaxis or last 4 digits of UPI Ref">
+
+            <div class="tot">
+              Amount Payable: ₹{{ booking.total.toLocaleString('en-IN') }} <small>({{ nights }} night(s) × ₹{{ room?.price?.toLocaleString('en-IN') }})</small>
+            </div>
+
+            <button class="cta" type="button" (click)="payNow()">
+              PAY ₹{{ booking.total.toLocaleString('en-IN') }} NOW →
+            </button>
+          }
+        </div>
+
+        <aside class="bs">
+          <h4>BOOKING SUMMARY</h4>
+          <div class="pl"><span>Booking ID</span><b>{{ booking.id }}</b></div>
+          <div class="pl"><span>Guest</span><b>{{ booking.guestName }}</b></div>
+          <div class="pl"><span>Phone</span><b>{{ booking.phone }}</b></div>
+          <div class="pl"><span>Room</span><b>{{ room?.name }}</b></div>
+          <div class="pl"><span>Check-In</span><b>{{ booking.checkIn }}</b></div>
+          <div class="pl"><span>Check-Out</span><b>{{ booking.checkOut }}</b></div>
+          <div class="pl"><span>Nights</span><b>{{ nights }}</b></div>
+          <div class="pl"><span>Guests</span><b>{{ booking.guests }}</b></div>
+          <div class="pl"><span>Booking Status</span><b>{{ booking.status }}</b></div>
+          <div class="pl"><span>Payment Status</span><b>{{ booking.paymentStatus || 'Unpaid' }}</b></div>
+          <h4>TOTAL AMOUNT</h4>
+          <div class="pl"><b>Total</b><b>₹{{ booking.total.toLocaleString('en-IN') }}</b></div>
+        </aside>
+      }
+    </div>
+  </div>
+</div>

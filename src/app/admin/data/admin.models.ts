@@ -10,7 +10,7 @@ export interface AdminRoom {
   name: string;
   desc: string;
   price: number;        // fixed price per night (INR)
-  capacity: number;     // max guests in this whole room
+  capacity: number;     // max guests in this whole room (2 guests per room)
   img: string;
   tags: string[];
   active: boolean;      // false = hidden/deactivated without deleting old bookings
@@ -27,6 +27,8 @@ export type BookingStatus =
 
 export type BookingSource = 'Website' | 'WhatsApp' | 'Phone' | 'WalkIn';
 
+export type PaymentStatus = 'Unpaid' | 'AwaitingPayment' | 'Paid';
+
 export interface AdminBooking {
   id: string;
   guestName: string;
@@ -34,13 +36,17 @@ export interface AdminBooking {
   email?: string;
   guests: number;
   roomId: number;
-  checkIn: string;      // YYYY-MM-DD
-  checkOut: string;     // YYYY-MM-DD
+  extraRoomIds?: number[]; // additional rooms auto-selected when guests > 2 (2 guests max per room)
+  checkIn: string;         // YYYY-MM-DD
+  checkOut: string;        // YYYY-MM-DD
   status: BookingStatus;
   source: BookingSource;
   note?: string;
   total: number;
-  createdAt: string;    // YYYY-MM-DD
+  createdAt: string;       // YYYY-MM-DD
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: string;
+  paidAt?: string;
 }
 
 export interface TripDeparture {
@@ -63,6 +69,24 @@ export interface AdminTrip {
   departures: TripDeparture[];
 }
 
+export interface AdminTripBooking {
+  id: string;                 // e.g. TB-1
+  guestName: string;
+  phone: string;
+  email?: string;
+  travellers: number;
+  tripId: number;
+  tripTitle: string;
+  startDate: string;          // YYYY-MM-DD
+  endDate: string;            // YYYY-MM-DD
+  optionalTemples?: string;
+  status: BookingStatus;
+  paymentStatus: PaymentStatus;
+  paymentMethod?: string;
+  total: number;
+  createdAt: string;
+}
+
 export interface GalleryPhoto {
   id: string;
   src: string;
@@ -79,6 +103,22 @@ export interface AdminReview {
   text: string;
   date: string;
   status: ReviewStatus;
+}
+
+/** Custom RAG Knowledge Base Document managed by Admin */
+export interface RagKnowledgeDoc {
+  id: string;
+  title: string;
+  category: string;
+  content: string;
+  keywords: string[];
+}
+
+export interface RagAnswer {
+  answer: string;
+  sources: string[];
+  actionLink?: string;
+  actionLabel?: string;
 }
 
 export interface SiteContent {
@@ -114,4 +154,21 @@ export function datesOverlap(aFrom: string, aTo: string, bFrom: string, bTo: str
 export function countNights(checkIn: string, checkOut: string): number {
   const ms = +new Date(checkOut) - +new Date(checkIn);
   return Math.max(1, Math.round(ms / 86_400_000));
+}
+
+/** Ensures Indian 10-digit numbers have the 91 country code for wa.me links */
+export function toWhatsAppPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 10) return '91' + digits;
+  if (digits.length === 11 && digits.startsWith('0')) return '91' + digits.slice(1);
+  return digits;
+}
+
+/** Formats YYYY-MM-DD as '16 Oct 2026' */
+export function formatStayDate(ymd: string): string {
+  if (!ymd) return '';
+  const [y, m, d] = ymd.split('-').map(Number);
+  if (!y || !m || !d) return ymd;
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${d} ${months[m - 1]} ${y}`;
 }

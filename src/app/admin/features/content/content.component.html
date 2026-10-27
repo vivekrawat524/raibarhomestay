@@ -1,6 +1,6 @@
 <section class="cnt">
-  <h2>Website Content &amp; Reviews</h2>
-  <p class="sub">Update homepage text, manage gallery photos, and approve guest reviews.</p>
+  <h2>Website Content, Reviews &amp; RAG AI Knowledge Base</h2>
+  <p class="sub">Update homepage text, manage gallery photos, moderate guest reviews, and train your live RAG AI Assistant.</p>
 
   @if (feedback()) {
     <p class="msg-bar">{{ feedback() }}</p>
@@ -53,19 +53,118 @@
 
   <!-- 3. Guest Reviews Moderation -->
   <div class="panel">
-    <h3>3. Guest Reviews Moderation ({{ data.reviews().length }})</h3>
+    <div class="rev-head">
+      <div>
+        <h3>
+          3. Guest Reviews Moderation ({{ data.reviews().length }})
+          @if (pendingReviewsCount() > 0) {
+            <span class="pend-pill">{{ pendingReviewsCount() }} Waiting for Approval</span>
+          }
+        </h3>
+        <p class="rev-sub">Website reviews arrive here as <b>Pending</b> first. Click <b>Accept</b> to publish on the website, or <b>Delete</b> to remove permanently.</p>
+      </div>
+
+      <div class="rev-tabs">
+        @for (st of ['All', 'Pending', 'Approved', 'Hidden']; track st) {
+          <button
+            type="button"
+            class="r-tab"
+            [class.active]="reviewFilter() === st"
+            (click)="reviewFilter.set($any(st))">
+            {{ st === 'Approved' ? 'Live on Website' : st }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (filteredReviews().length === 0) {
+      <p class="empty-rev">No guest reviews in this filter.</p>
+    } @else {
+      <div class="rev-list">
+        @for (r of filteredReviews(); track r.id) {
+          <div class="rev-item">
+            <div class="rev-body">
+              <div class="rev-top">
+                <span class="rev-id">{{ r.id }}</span>
+                <strong>{{ r.name }}</strong>
+                <span class="stars">{{ '★'.repeat(r.rating) }}</span>
+                <span class="badge" [attr.data-st]="r.status">
+                  {{ r.status === 'Approved' ? 'Live on Website ✓' : r.status }}
+                </span>
+              </div>
+              <p>"{{ r.text }}"</p>
+              <small>{{ r.stay }} · Submitted {{ formatDate(r.date) }}</small>
+            </div>
+            <div class="acts">
+              @if (r.status !== 'Approved') {
+                <button class="act ok" type="button" (click)="setReview(r.id, 'Approved')">✓ Accept &amp; Publish</button>
+              }
+              @if (r.status === 'Approved') {
+                <button class="act hide-btn" type="button" (click)="setReview(r.id, 'Hidden')">Hide</button>
+              }
+              <button class="act del-btn" type="button" (click)="deleteReview(r.id)">🗑️ Delete</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- 4. RAG AI Knowledge Base & Optional Gemini Key -->
+  <div class="panel">
+    <div class="rev-head">
+      <div>
+        <h3>4. ✨ RAG AI Knowledge Base ({{ data.ragDocs().length }} Custom Docs + Live Rooms/Trips)</h3>
+        <p class="rev-sub">
+          The website's <b>Ask AI</b> button automatically retrieves from your live Rooms, Calendar, Temple Trips, and the custom Knowledge Base below (works 100% without a backend!).
+        </p>
+      </div>
+    </div>
+
+    <form class="add-row" (ngSubmit)="saveGeminiKey()">
+      <input
+        class="in"
+        type="password"
+        name="geminiKey"
+        [(ngModel)]="geminiKeyInput"
+        placeholder="Optional: Paste free Google Gemini API Key (leave blank for built-in offline RAG)">
+      <button class="btn" type="submit">Save AI Mode</button>
+    </form>
+
+    <form class="kb-form" (ngSubmit)="addKnowledgeDoc()">
+      <div class="grid-2">
+        <div>
+          <label>DOCUMENT TITLE *</label>
+          <input class="in" name="kbTitle" [(ngModel)]="kbForm.title" placeholder="e.g. Bonfire & Winter Heater Charges" required>
+        </div>
+        <div>
+          <label>CATEGORY &amp; KEYWORDS</label>
+          <input class="in" name="kbKeywords" [(ngModel)]="kbForm.keywords" placeholder="e.g. bonfire, heater, winter, snow, आग">
+        </div>
+      </div>
+      <div>
+        <label>KNOWLEDGE CONTENT (WHAT AI SHOULD ANSWER) *</label>
+        <textarea class="in" name="kbContent" [(ngModel)]="kbForm.content" placeholder="e.g. Evening garden bonfire is available on request for ₹400. Room heaters are provided in winter." required></textarea>
+      </div>
+      <div class="foot">
+        <button class="btn" type="submit">+ Add to RAG Knowledge Base</button>
+      </div>
+    </form>
 
     <div class="rev-list">
-      @for (r of data.reviews(); track r.id) {
+      @for (doc of data.ragDocs(); track doc.id) {
         <div class="rev-item">
-          <div>
-            <strong>{{ r.name }} · {{ '★'.repeat(r.rating) }} <span class="badge" [attr.data-st]="r.status">{{ r.status }}</span></strong>
-            <p>"{{ r.text }}"</p>
-            <small>{{ r.stay }} · {{ r.date }}</small>
+          <div class="rev-body">
+            <div class="rev-top">
+              <span class="rev-id">{{ doc.id }}</span>
+              <strong>{{ doc.title }}</strong>
+              <span class="badge" data-st="Approved">{{ doc.category }}</span>
+            </div>
+            <p>{{ doc.content }}</p>
+            <small>Keywords: {{ doc.keywords.join(', ') }}</small>
           </div>
           <div class="acts">
-            <button class="act ok" type="button" (click)="setReview(r.id, 'Approved')">Approve</button>
-            <button class="act no" type="button" (click)="setReview(r.id, 'Hidden')">Hide</button>
+            <button class="act del-btn" type="button" (click)="deleteKnowledgeDoc(doc.id)">🗑️ Delete</button>
           </div>
         </div>
       }

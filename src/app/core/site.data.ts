@@ -1,5 +1,5 @@
-const PHONE = '+918171176089';      // <-- put your real number here (keep the +91 format)
-const EMAIL = 'negisuri010@gmail.com';
+const PHONE = '+917895274798';      // <-- put your real number here (keep the +91 format)
+const EMAIL = 'vivekrawat12122004@gmail.com';
 const PLACE = 'Kainyur, Thalisain, Pauri Garhwal, Uttarakhand 246285';
 const WA = PHONE.replace(/\D/g, '');    // digits only, used for wa.me
 
