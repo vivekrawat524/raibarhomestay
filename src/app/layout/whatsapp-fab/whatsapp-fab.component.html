@@ -110,12 +110,16 @@
 
     <!-- Input Footer -->
     <form class="chat-footer" (ngSubmit)="sendQuery()">
+      <label class="attach-btn" title="Upload PDF or Document to AI">
+        <span>📎</span>
+        <input type="file" accept=".pdf,.txt,.md,.doc,.docx" (change)="onFileAttached($event)">
+      </label>
       <input
         type="text"
         name="q"
         [(ngModel)]="userQuery"
         class="chat-input"
-        placeholder="Ask in English or Hindi (e.g. 4 guests 2 nights)..."
+        placeholder="Ask a question or attach PDF..."
         autocomplete="off">
       <button type="submit" class="send-btn" [disabled]="!userQuery().trim() || isThinking()">
         ➤

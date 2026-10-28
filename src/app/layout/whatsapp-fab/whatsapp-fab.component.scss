@@ -275,10 +275,26 @@
 /* FOOTER */
 .chat-footer {
   display: flex;
+  align-items: center;
   padding: 10px 12px;
   background: #fff;
   border-top: 1px solid #e2e8f0;
   gap: 8px;
+}
+.attach-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  input[type="file"] { display: none; }
+  &:hover { background: #e2e8f0; }
 }
 .chat-input {
   flex: 1;
