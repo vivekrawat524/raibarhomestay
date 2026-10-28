@@ -1,70 +1,125 @@
-<!-- FLOATING RAG AI CHAT WINDOW -->
+<!-- FLOATING BUTTON (Corner) -->
+<div class="fab-wrapper">
+  @if (!isOpen()) {
+    <button type="button" class="fab-btn" (click)="toggleChat()" aria-label="Open AI Assistant">
+      <span class="sparkle-icon">✨</span>
+      <span class="fab-label">Ask AI Receptionist</span>
+      <span class="online-indicator"></span>
+    </button>
+  }
+</div>
+
+<!-- AI ASSISTANT CHAT WINDOW -->
 @if (isOpen()) {
-  <div class="rag-box">
-    <div class="rag-head">
-      <div>
-        <span class="rag-badge">✨ RAG AI CONCIERGE · LIVE DATA</span>
-        <h4>Raibar Homestay Assistant</h4>
+  <div class="chat-modal">
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="header-info">
+        <div class="avatar">🏔️</div>
+        <div>
+          <div class="title-row">
+            <strong>Raibar AI Receptionist</strong>
+            <span class="live-dot" title="Online"></span>
+          </div>
+          <small>Grounded in Homestay Knowledge &amp; Policies</small>
+        </div>
       </div>
-      <button type="button" class="rag-close" (click)="toggleChat()">✕</button>
+      <div class="header-actions">
+        <button type="button" class="gear-btn" (click)="showKeyModal.set(!showKeyModal())" title="AI Settings (Gemini Key)">⚙️</button>
+        <a [href]="site.waLink" target="_blank" rel="noopener" class="wa-icon-btn" title="Chat directly on WhatsApp">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.04 2a9.9 9.9 0 0 0-8.4 15.1L2 22l5-1.6A9.9 9.9 0 1 0 12.04 2Zm0 18.1a8.1 8.1 0 0 1-4.15-1.15l-.3-.18-2.97.95.97-2.9-.2-.3A8.1 8.1 0 1 1 12.04 20.1Zm4.45-6.06c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.32-.75-1.8-.2-.47-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.5.58.18 1.1.16 1.51.1.46-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z"/>
+          </svg>
+        </a>
+        <button type="button" class="close-btn" (click)="closeChat()" aria-label="Close">✕</button>
+      </div>
     </div>
 
-    <div class="rag-msgs">
+    <!-- AI KEY DRAWER -->
+    @if (showKeyModal()) {
+      <div class="key-drawer">
+        <div class="key-top">
+          <strong>✨ Google Gemini AI Mode</strong>
+          <button type="button" class="close-drawer" (click)="showKeyModal.set(false)">✕</button>
+        </div>
+        <p class="key-sub">
+          Paste a free Google Gemini key to give the assistant 100% human-like dynamic speech.
+        </p>
+        <form (ngSubmit)="saveApiKey()" class="key-form">
+          <input
+            type="password"
+            name="kIn"
+            [(ngModel)]="apiKeyInput"
+            class="key-in"
+            placeholder="Paste Gemini Key (AIzaSy...)">
+          <button type="submit" class="key-save-btn">Save</button>
+        </form>
+        <small class="key-help">Get free key with 0 credit card: <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">aistudio.google.com</a></small>
+      </div>
+    }
+
+    <!-- Messages Body -->
+    <div class="chat-body">
       @for (m of messages(); track $index) {
-        <div class="msg-row" [class.user]="m.role === 'user'">
-          <div class="bubble">
-            <p class="b-txt">{{ m.text }}</p>
-            @if (m.sources?.length) {
-              <div class="src-row">
-                <span class="src-lbl">📚 Retrieved:</span>
-                @for (s of m.sources; track s) {
-                  <span class="src-pill">{{ s }}</span>
+        <div class="msg-bubble" [class.user]="m.sender === 'user'" [class.assistant]="m.sender === 'assistant'">
+          <div class="msg-content">
+            <p class="msg-text">{{ m.text }}</p>
+
+            <!-- Citations & Sources -->
+            @if (m.sources && m.sources.length > 0) {
+              <div class="sources-wrap">
+                <span class="source-tag">Sources:</span>
+                @for (s of m.sources; track s.docName) {
+                  <span class="citation-pill">
+                    📄 {{ s.docName }} <small>({{ s.score }}% match)</small>
+                  </span>
                 }
               </div>
             }
+
+            <!-- Direct Action Button -->
             @if (m.actionLink) {
-              <a class="act-link" [routerLink]="m.actionLink" (click)="isOpen.set(false)">
-                {{ m.actionLabel || 'Book Now →' }}
-              </a>
+              <div class="action-wrap">
+                <button type="button" class="action-btn" (click)="navigate(m.actionLink)">
+                  {{ m.actionLabel || 'View Details →' }}
+                </button>
+              </div>
             }
+
+            <span class="msg-time">{{ m.time }}</span>
           </div>
         </div>
       }
+
       @if (isThinking()) {
-        <div class="msg-row">
-          <div class="bubble thinking">Retrieving live homestay data...</div>
+        <div class="msg-bubble assistant thinking">
+          <div class="dots">
+            <span></span><span></span><span></span>
+          </div>
+          <small>Searching uploaded documents...</small>
         </div>
       }
     </div>
 
-    <div class="quick-chips">
-      @for (p of quickPrompts; track p) {
-        <button type="button" class="chip" (click)="sendPrompt(p)">{{ p }}</button>
+    <!-- Quick Question Suggestions -->
+    <div class="quick-pills">
+      @for (q of quickQuestions; track q) {
+        <button type="button" class="pill" (click)="sendQuery(q)">{{ q }}</button>
       }
     </div>
 
-    <form class="rag-input" (ngSubmit)="sendPrompt()">
+    <!-- Input Footer -->
+    <form class="chat-footer" (ngSubmit)="sendQuery()">
       <input
         type="text"
-        name="ragQuery"
-        [(ngModel)]="query"
-        placeholder="Ask about rooms, 4 guests price, trips, food..."
+        name="q"
+        [(ngModel)]="userQuery"
+        class="chat-input"
+        placeholder="Ask in English or Hindi (e.g. 4 guests 2 nights)..."
         autocomplete="off">
-      <button type="submit" [disabled]="isThinking()">Ask →</button>
+      <button type="submit" class="send-btn" [disabled]="!userQuery().trim() || isThinking()">
+        ➤
+      </button>
     </form>
   </div>
 }
-
-<!-- FLOATING BUTTONS: RAG AI ASSISTANT + WHATSAPP -->
-<div class="fab-stack">
-  <button type="button" class="rag-fab" (click)="toggleChat()" aria-label="Ask Raibar AI Assistant">
-    <span class="sp">✨</span>
-    <span>{{ isOpen() ? 'Close AI' : 'Ask AI' }}</span>
-  </button>
-
-  <a class="fab" [href]="site.waLink" target="_blank" rel="noopener" aria-label="Chat with us on WhatsApp">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12.04 2a9.9 9.9 0 0 0-8.4 15.1L2 22l5-1.6A9.9 9.9 0 1 0 12.04 2Zm0 18.1a8.1 8.1 0 0 1-4.15-1.15l-.3-.18-2.97.95.97-2.9-.2-.3A8.1 8.1 0 1 1 12.04 20.1Zm4.45-6.06c-.24-.12-1.44-.71-1.66-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.77.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.32-.75-1.8-.2-.47-.4-.41-.55-.42h-.47c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.5.58.18 1.1.16 1.51.1.46-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z"/>
-    </svg>
-  </a>
-</div>

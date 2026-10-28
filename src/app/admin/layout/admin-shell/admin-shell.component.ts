@@ -24,10 +24,10 @@ export class AdminShellComponent {
     { label: 'Rooms',     icon: '🛏️', path: 'rooms',     ready: true },
     { label: 'Trips',     icon: '🏔️', path: 'trips',     ready: true },
     { label: 'Website',   icon: '🖼️', path: 'content',   ready: true },
+    { label: 'AI Knowledge', icon: '📄', path: 'knowledge', ready: true },
     { label: 'Payments',  icon: '💳', path: 'payments',  ready: true },
     { label: 'Settings',  icon: '⚙️', path: 'settings',  ready: true }
   ];
- 
 
   toggle() { this.menuOpen.update(open => !open); }
   close() { this.menuOpen.set(false); }

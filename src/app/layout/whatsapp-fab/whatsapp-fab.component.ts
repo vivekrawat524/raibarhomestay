@@ -1,70 +1,115 @@
 import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { AdminDataService } from '../../admin/data/admin-data.service';
+import { Router } from '@angular/router';
 import { SITE } from '../../core/site.data';
+import { AdminDataService } from '../../admin/data/admin-data.service';
+import { AssistantAnswer } from '../../admin/data/admin.models';
 
-export interface ChatMessage {
-  role: 'user' | 'ai';
+interface ChatMessage {
+  sender: 'user' | 'assistant';
   text: string;
-  sources?: string[];
+  time: string;
+  sources?: { title: string; docName: string; score: number }[];
   actionLink?: string;
   actionLabel?: string;
+  latencyMs?: number;
 }
 
 @Component({
   selector: 'app-whatsapp-fab',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './whatsapp-fab.component.html',
   styleUrl: './whatsapp-fab.component.scss'
 })
 export class WhatsappFabComponent {
   site = SITE;
-  private adminData = inject(AdminDataService);
+  adminData = inject(AdminDataService);
+  router = inject(Router);
 
-  isOpen = signal(false);
-  isThinking = signal(false);
-  query = '';
+  isOpen = signal<boolean>(false);
+  isThinking = signal<boolean>(false);
+  userQuery = signal<string>('');
+  showKeyModal = signal<boolean>(false);
+  apiKeyInput = this.adminData.geminiApiKey();
 
-  quickPrompts = [
-    'Room price for 4 guests for 2 nights?',
-    'Which rooms are available tonight?',
-    'Tell me about the 5-Day Temple Trip',
-    'Is food included in the room price?'
-  ];
+  saveApiKey() {
+    this.adminData.saveGeminiApiKey(this.apiKeyInput.trim());
+    this.showKeyModal.set(false);
+  }
 
   messages = signal<ChatMessage[]>([
     {
-      role: 'ai',
-      text: 'Namaste! 🙏 I am the Raibar Homestay RAG AI Assistant. Ask me about live room availability, prices for your group, Garhwal temple trips, or homestay rules!',
-      sources: ['Live Rooms & Calendar', 'Temple Trips & KB']
+      sender: 'assistant',
+      text: 'Namaste! 🙏 I am your Raibar Homestay AI Assistant. Ask me anything about our mountain rooms, homemade Pahadi meals, check-in policies, or Garhwal temple trekking guides!',
+      time: 'Just now'
     }
   ]);
+
+  quickQuestions = [
+    'How much for 4 guests for 2 nights?',
+    'What should I pack for the Deeba Mandir trek?',
+    'What is the check-in time and meal policy?'
+  ];
 
   toggleChat() {
     this.isOpen.update(v => !v);
   }
 
-  async sendPrompt(text?: string) {
-    const q = (text ?? this.query).trim();
+  closeChat() {
+    this.isOpen.set(false);
+  }
+
+  async sendQuery(text?: string) {
+    const q = (text || this.userQuery()).trim();
     if (!q || this.isThinking()) return;
 
-    this.query = '';
-    this.messages.update(list => [...list, { role: 'user', text: q }]);
-    this.isThinking.set(true);
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    const res = await this.adminData.askRag(q);
+    // 1. Add user message
     this.messages.update(list => [
       ...list,
-      {
-        role: 'ai',
-        text: res.answer,
-        sources: res.sources,
-        actionLink: res.actionLink,
-        actionLabel: res.actionLabel
-      }
+      { sender: 'user', text: q, time: now }
     ]);
-    this.isThinking.set(false);
+    this.userQuery.set('');
+    this.isThinking.set(true);
+
+    try {
+      // 2. Ask RAG AI Assistant with conversation history
+      const history = this.messages().map(m => ({ sender: m.sender, text: m.text }));
+      const res: AssistantAnswer = await this.adminData.askAssistant(q, history);
+
+      this.messages.update(list => [
+        ...list,
+        {
+          sender: 'assistant',
+          text: res.answer,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          sources: res.sources,
+          actionLink: res.actionLink,
+          actionLabel: res.actionLabel,
+          latencyMs: res.latencyMs
+        }
+      ]);
+    } catch {
+      this.messages.update(list => [
+        ...list,
+        {
+          sender: 'assistant',
+          text: 'Namaste! Please connect with us directly on WhatsApp for immediate room booking assistance.',
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          actionLink: '/book',
+          actionLabel: 'Book Your Stay →'
+        }
+      ]);
+    } finally {
+      this.isThinking.set(false);
+    }
+  }
+
+  navigate(link: string) {
+    this.closeChat();
+    this.router.navigateByUrl(link);
   }
 }

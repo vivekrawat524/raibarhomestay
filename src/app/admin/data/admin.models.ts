@@ -1,22 +1,3 @@
-export interface BlockedRange {
-  id: string;
-  from: string;   // YYYY-MM-DD (inclusive)
-  to: string;     // YYYY-MM-DD (exclusive, checkout day)
-  reason: string;
-}
-
-export interface AdminRoom {
-  id: number;
-  name: string;
-  desc: string;
-  price: number;        // fixed price per night (INR)
-  capacity: number;     // max guests in this whole room (2 guests per room)
-  img: string;
-  tags: string[];
-  active: boolean;      // false = hidden/deactivated without deleting old bookings
-  blockedDates: BlockedRange[];
-}
-
 export type BookingStatus =
   | 'Pending'
   | 'Confirmed'
@@ -25,52 +6,88 @@ export type BookingStatus =
   | 'Rejected'
   | 'Cancelled';
 
-export type BookingSource = 'Website' | 'WhatsApp' | 'Phone' | 'WalkIn';
+export type PaymentStatus =
+  | 'Paid'
+  | 'Unpaid'
+  | 'Partial'
+  | 'Refunded'
+  | 'AwaitingPayment';
 
-export type PaymentStatus = 'Unpaid' | 'AwaitingPayment' | 'Paid';
+export type BookingSource =
+  | 'Website'
+  | 'WhatsApp'
+  | 'Phone'
+  | 'WalkIn'
+  | 'Booking.com'
+  | 'Airbnb';
 
-export interface AdminBooking {
+export interface BlockedRange {
   id: string;
-  guestName: string;
-  phone: string;
-  email?: string;
-  guests: number;
-  roomId: number;
-  extraRoomIds?: number[]; // additional rooms auto-selected when guests > 2 (2 guests max per room)
-  checkIn: string;         // YYYY-MM-DD
-  checkOut: string;        // YYYY-MM-DD
-  status: BookingStatus;
-  source: BookingSource;
-  note?: string;
-  total: number;
-  createdAt: string;       // YYYY-MM-DD
-  paymentStatus?: PaymentStatus;
-  paymentMethod?: string;
-  paidAt?: string;
+  from: string;
+  to: string;
+  reason?: string;
 }
 
 export interface TripDeparture {
   id: string;
-  date: string;         // YYYY-MM-DD
-  capacity: number;     // max travellers for this departure
-  booked: number;       // seats already booked
+  date: string;
+  capacity: number;
+  booked: number;
+}
+
+export interface AdminBooking {
+  id: string;                 // BK-1, BK-2...
+  guestName: string;
+  phone: string;
+  email?: string;
+  guests: number;
+  roomId: number;             // Primary room ID
+  extraRoomIds?: number[];    // Additional room IDs for multi-room group bookings
+  checkIn: string;            // YYYY-MM-DD
+  checkOut: string;           // YYYY-MM-DD
+  status: BookingStatus;
+  paymentStatus?: PaymentStatus;
+  paymentMethod?: string;
+  total: number;
+  createdAt: string;          // YYYY-MM-DD
+  source: BookingSource;
+  note?: string;
+  paidAt?: string;
+}
+
+export interface AdminRoom {
+  id: number;
+  name: string;
+  price: number;
+  desc?: string;
+  capacity?: number;
+  maxGuests?: number;
+  bed?: string;
+  view?: string;
+  balcony?: boolean;
+  tags: string[];
+  active: boolean;
+  img: string;
+  gallery?: string[];
+  description?: string;
+  blockedDates: BlockedRange[];
 }
 
 export interface AdminTrip {
   id: number;
-  days: number;
   title: string;
-  desc: string;
-  price: number;              // price per person (INR)
+  days: number;
+  price: number;              // per person
   img: string;
-  fixedTemples: string[];     // temple keys from TEMPLES (e.g. 'bh', 'ar')
-  optionalTemples: string[];  // optional trek/add-on temple keys
+  desc: string;
+  fixedTemples: string[];
+  optionalTemples: string[];
   active: boolean;
   departures: TripDeparture[];
 }
 
 export interface AdminTripBooking {
-  id: string;                 // e.g. TB-1
+  id: string;                 // TB-1, TB-2...
   guestName: string;
   phone: string;
   email?: string;
@@ -105,22 +122,6 @@ export interface AdminReview {
   status: ReviewStatus;
 }
 
-/** Custom RAG Knowledge Base Document managed by Admin */
-export interface RagKnowledgeDoc {
-  id: string;
-  title: string;
-  category: string;
-  content: string;
-  keywords: string[];
-}
-
-export interface RagAnswer {
-  answer: string;
-  sources: string[];
-  actionLink?: string;
-  actionLabel?: string;
-}
-
 export interface SiteContent {
   heroTagline: string;
   aboutHeading: string;
@@ -140,6 +141,46 @@ export interface BusinessSettings {
   checkInTime: string;
   checkOutTime: string;
   cancellationPolicy: string;
+}
+
+/** Individual chunk extracted from an uploaded document */
+export interface KnowledgeChunk {
+  id: string;
+  docId: string;
+  docName: string;
+  category: string;
+  text: string;
+  wordCount: number;
+  keywords: string[];
+}
+
+/** Uploaded document in the Knowledge Base library */
+export interface KnowledgeDocument {
+  id: string;
+  name: string;
+  fileType: string;
+  fileSize: string;
+  uploadedAt: string;
+  chunksCount: number;
+  summary?: string;
+  chunks: KnowledgeChunk[];
+}
+
+/** Ranked search hit returned by the RAG retrieval engine */
+export interface RetrievedHit {
+  chunk: KnowledgeChunk;
+  score: number;
+  rank: number;
+}
+
+/** Answer returned to the guest or tester with grounded sources */
+export interface AssistantAnswer {
+  answer: string;
+  sources: { title: string; docName: string; score: number }[];
+  retrievedHits: RetrievedHit[];
+  actionLink?: string;
+  actionLabel?: string;
+  latencyMs: number;
 }
 
 /**

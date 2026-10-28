@@ -7,6 +7,7 @@ import { BookingsComponent } from './features/bookings/bookings.component';
 import { RoomsComponent } from './features/rooms/rooms.component';
 import { TripsComponent } from './features/trips/trips.component';
 import { ContentComponent } from './features/content/content.component';
+import { KnowledgeComponent } from './features/knowledge/knowledge.component';
 import { PaymentsComponent } from './features/payments/payments.component';
 import { SettingsComponent } from './features/settings/settings.component';
 
@@ -24,6 +25,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'rooms', component: RoomsComponent },
       { path: 'trips', component: TripsComponent },
       { path: 'content', component: ContentComponent },
+      { path: 'knowledge', component: KnowledgeComponent },
       { path: 'payments', component: PaymentsComponent },
       { path: 'settings', component: SettingsComponent },
       { path: '**', redirectTo: 'dashboard' }

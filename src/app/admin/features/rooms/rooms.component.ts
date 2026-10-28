@@ -56,9 +56,9 @@ export class RoomsComponent {
     this.editingId.set(room.id);
     this.form = {
       name: room.name,
-      desc: room.desc,
+      desc: room.desc || '',
       price: room.price,
-      capacity: room.capacity,
+      capacity: room.capacity || 2,
       img: room.img,
       tagsText: room.tags.join(', '),
       active: room.active

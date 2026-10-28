@@ -1,0 +1,209 @@
+<section class="kb-page">
+  <div class="kb-header">
+    <div>
+      <h2>📄 AI Knowledge Base &amp; Document Uploader</h2>
+      <p class="sub">
+        Upload your homestay's PDFs, policies, and FAQs. The website AI Assistant reads these instantly to answer guest questions accurately.
+      </p>
+    </div>
+    <div class="stats-pill">
+      <strong>{{ data.knowledgeDocs().length }} Documents</strong> · <span>{{ totalChunks() }} Chunks Active</span>
+    </div>
+  </div>
+
+  @if (feedback()) {
+    <div class="msg-bar">
+      <span>{{ feedback() }}</span>
+      <button type="button" class="close-msg" (click)="feedback.set('')">✕</button>
+    </div>
+  }
+
+  <!-- OPTIONAL GEMINI LLM KEY -->
+  <div class="gemini-card">
+    <div class="gemini-info">
+      <strong>✨ Generative AI Engine (Google Gemini 1.5 Flash)</strong>
+      <p class="gemini-desc">
+        {{ data.geminiApiKey() ? '🟢 Connected: Responding with state-of-the-art LLM reasoning & dynamic conversation.' : '⚪ Built-in Conversational Mode Active. Paste a free Gemini API key to unlock full ChatGPT-like speech.' }}
+      </p>
+    </div>
+    <form class="gemini-form" (ngSubmit)="saveGeminiKey()">
+      <input
+        type="password"
+        name="gKey"
+        [(ngModel)]="geminiKeyInput"
+        class="in gemini-in"
+        placeholder="Optional: Paste Google Gemini API Key (AIzaSy...)">
+      <button type="submit" class="btn-primary">Save Key</button>
+    </form>
+  </div>
+
+  <!-- 1. DRAG & DROP UPLOAD ZONE -->
+  <div
+    class="upload-dropzone"
+    [class.dragging]="isDragging()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)">
+    <div class="drop-content">
+      <div class="drop-icon">📁</div>
+      <h3>Drag &amp; Drop your PDF or Text File here</h3>
+      <p class="drop-hint">Supports: <b>.pdf, .txt, .md, .doc</b> (Text is automatically sliced into semantic chunks)</p>
+
+      <div class="drop-actions">
+        <label class="btn-primary file-label">
+          <span>📤 Choose File from Computer</span>
+          <input type="file" accept=".pdf,.txt,.md,.doc,.docx" (change)="onFileSelected($event)">
+        </label>
+
+        <button type="button" class="btn-secondary" (click)="loadSamplePolicy()">
+          ⚡ Load Sample Homestay PDF Policy
+        </button>
+
+        <button type="button" class="btn-text" (click)="toggleNoteForm()">
+          {{ showNoteForm() ? '✕ Close Note Editor' : '✏️ Or Type a Quick Note' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INLINE NOTE / FAQ FORM (Toggled) -->
+  @if (showNoteForm()) {
+    <form class="note-box" (ngSubmit)="saveNote()">
+      <h4>Write a Custom Knowledge Note / FAQ</h4>
+      <div class="grid-2">
+        <div>
+          <label>DOCUMENT TITLE *</label>
+          <input class="in" name="noteTitle" [(ngModel)]="noteForm.title" placeholder="e.g. Bonfire &amp; Winter Blanket Rules" required>
+        </div>
+        <div>
+          <label>CATEGORY</label>
+          <input class="in" name="noteCat" [(ngModel)]="noteForm.category" placeholder="e.g. Winter Amenities">
+        </div>
+      </div>
+      <div>
+        <label>DOCUMENT CONTENT *</label>
+        <textarea class="in" rows="4" name="noteContent" [(ngModel)]="noteForm.content" placeholder="Type policies, FAQs, or local travel guidelines..." required></textarea>
+      </div>
+      <div class="foot">
+        <button class="btn-primary" type="submit">+ Index Note into AI Memory</button>
+      </div>
+    </form>
+  }
+
+  <!-- 2. UPLOADED DOCUMENTS LIBRARY -->
+  <div class="panel">
+    <div class="panel-head">
+      <h3>📚 Uploaded Knowledge Library ({{ data.knowledgeDocs().length }})</h3>
+      <span class="panel-tag">Live in Website Assistant</span>
+    </div>
+
+    @if (data.knowledgeDocs().length === 0) {
+      <div class="empty-state">
+        <p>No documents uploaded yet. Upload a PDF or click "Load Sample Homestay PDF Policy" above!</p>
+      </div>
+    } @else {
+      <div class="docs-list">
+        @for (doc of data.knowledgeDocs(); track doc.id) {
+          <div class="doc-card" [class.expanded]="expandedDocId() === doc.id">
+            <div class="doc-main">
+              <div class="doc-icon">
+                {{ doc.fileType === 'pdf' ? '📄' : doc.fileType === 'note' ? '📝' : '📑' }}
+              </div>
+              <div class="doc-info">
+                <div class="doc-top">
+                  <strong>{{ doc.name }}</strong>
+                  <span class="type-badge">{{ doc.fileType.toUpperCase() }}</span>
+                  <span class="chunk-badge">{{ doc.chunksCount }} Chunks</span>
+                </div>
+                <p class="doc-summary">{{ doc.summary }}</p>
+                <div class="doc-meta">
+                  <small>ID: {{ doc.id }} · Size: {{ doc.fileSize }} · Added: {{ doc.uploadedAt }}</small>
+                </div>
+              </div>
+              <div class="doc-actions">
+                <button
+                  type="button"
+                  class="btn-outline"
+                  (click)="toggleExpand(doc.id)">
+                  {{ expandedDocId() === doc.id ? 'Hide Chunks ▴' : 'View Chunks ▾' }}
+                </button>
+                <button
+                  type="button"
+                  class="btn-del"
+                  title="Remove from AI Memory"
+                  (click)="deleteDoc(doc.id)">
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+
+            <!-- CHUNKS ACCORDION -->
+            @if (expandedDocId() === doc.id) {
+              <div class="chunks-accordion">
+                <div class="accordion-head">
+                  <strong>Extracted Knowledge Chunks for {{ doc.name }}:</strong>
+                </div>
+                <div class="chunks-grid">
+                  @for (chunk of doc.chunks; track chunk.id) {
+                    <div class="chunk-item">
+                      <div class="chunk-bar">
+                        <span class="chunk-id">{{ chunk.id }}</span>
+                        <span class="chunk-cat">{{ chunk.category }}</span>
+                        <span class="chunk-words">{{ chunk.wordCount }} words</span>
+                      </div>
+                      <p class="chunk-text">{{ chunk.text }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- 3. LIVE RETRIEVAL TESTER -->
+  <div class="panel tester-panel">
+    <div class="panel-head">
+      <h3>🔬 Test Your AI Knowledge Search</h3>
+      <span class="panel-tag">Live Inspector</span>
+    </div>
+    <p class="sub-tester">
+      Type any question a guest might ask to see which document chunks the AI retrieves and how confident it is.
+    </p>
+
+    <form class="test-bar" (ngSubmit)="runTestSearch()">
+      <input
+        class="in test-input"
+        name="testQ"
+        [(ngModel)]="testQuery"
+        placeholder="e.g. Can 4 people stay in one room? Or what shoes for Deeba trek?">
+      <button class="btn-primary" type="submit">Test Search</button>
+    </form>
+
+    @if (hasTested()) {
+      <div class="test-results">
+        @if (testResults().length === 0) {
+          <p class="no-match">No strong matches found for this query. Try adding a document or note with these keywords!</p>
+        } @else {
+          <div class="results-head">
+            <strong>Top {{ testResults().length }} Grounded Matches Found:</strong>
+          </div>
+          <div class="results-grid">
+            @for (hit of testResults(); track hit.chunk.id) {
+              <div class="result-card">
+                <div class="result-bar">
+                  <span class="rank-tag">#{{ hit.rank }} Match</span>
+                  <span class="score-pill">{{ hit.score }}% Relevance</span>
+                  <span class="source-doc">📄 {{ hit.chunk.docName }}</span>
+                </div>
+                <p class="result-text">{{ hit.chunk.text }}</p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

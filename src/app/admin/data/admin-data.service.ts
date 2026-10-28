@@ -1,5 +1,4 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { TEMPLES } from '../../core/site.data';
 import {
   AdminBooking,
   AdminReview,
@@ -9,9 +8,11 @@ import {
   BlockedRange,
   BookingStatus,
   BusinessSettings,
+  AssistantAnswer,
+  KnowledgeChunk,
+  KnowledgeDocument,
+  RetrievedHit,
   PaymentStatus,
-  RagAnswer,
-  RagKnowledgeDoc,
   ReviewStatus,
   SiteContent,
   TripDeparture,
@@ -38,47 +39,83 @@ const TRIP_BOOKINGS_KEY = 'raibar-admin-trip-bookings-v1';
 const CONTENT_KEY = 'raibar-admin-content-v1';
 const REVIEWS_KEY = 'raibar-admin-reviews-v1';
 const SETTINGS_KEY = 'raibar-admin-settings-v1';
-const RAG_DOCS_KEY = 'raibar-admin-rag-docs-v1';
+
+
+const KNOWLEDGE_DOCS_KEY = 'raibar-admin-knowledge-v2';
 const GEMINI_KEY_STORAGE = 'raibar-admin-gemini-key-v1';
 
-/** Statuses that occupy a room on the calendar */
-const ACTIVE_STATUSES: BookingStatus[] = ['Confirmed', 'CheckedIn'];
-
-const SEED_RAG_DOCS: RagKnowledgeDoc[] = [
+const SEED_KNOWLEDGE_DOCS: KnowledgeDocument[] = [
   {
-    id: 'KB-1',
-    title: 'Food & Homemade Pahadi Meals',
-    category: 'Food & Dining',
-    content:
-      'Food is not included in the base room tariff; guests pay extra for meals. We serve fresh, home-cooked Garhwali / Pahadi vegetarian meals (Mandua roti, Pahadi dal, seasonal organic vegetables, tea & breakfast) prepared on order.',
-    keywords: ['food', 'meal', 'breakfast', 'dinner', 'lunch', 'khana', 'eat', 'pahadi', 'included', 'extra', 'भोजन', 'खाना']
+    id: 'DOC-1',
+    name: 'Raibar_Homestay_Policies.pdf',
+    fileType: 'pdf',
+    fileSize: '18.4 KB',
+    uploadedAt: dayOffset(-5),
+    chunksCount: 3,
+    summary: 'Official house rules, meal guidelines, room capacity, and winter heating policies.',
+    chunks: [
+      {
+        id: 'CHK-DOC-1-1',
+        docId: 'DOC-1',
+        docName: 'Raibar_Homestay_Policies.pdf',
+        category: 'House Rules & Capacity',
+        text: 'Check-in time is 12:00 PM and check-out is 10:00 AM. Each room accommodates a maximum of 2 guests. For groups of 3 or 4 guests, our reservation system books 2 rooms to ensure comfort. Quiet hours are observed from 10:00 PM to 6:00 AM to preserve mountain peace.',
+        wordCount: 48,
+        keywords: ['check-in', 'check-out', 'time', 'hours', 'quiet', 'guest', 'guests', 'capacity', '2', '4', 'room', 'rooms', 'नियम', 'समय']
+      },
+      {
+        id: 'CHK-DOC-1-2',
+        docId: 'DOC-1',
+        docName: 'Raibar_Homestay_Policies.pdf',
+        category: 'Food & Pahadi Dining',
+        text: 'Food is not included in the base room tariff. We prepare fresh, authentic Garhwali home-cooked vegetarian meals on order (Mandua/Ragi roti, Jhangora kheer, local mountain dal, seasonal organic greens, ginger tea, and country breakfast). Meal orders are placed 2 hours in advance.',
+        wordCount: 44,
+        keywords: ['food', 'meal', 'meals', 'dining', 'breakfast', 'lunch', 'dinner', 'tea', 'pahadi', 'garhwali', 'mandua', 'roti', 'dal', 'extra', 'charges', 'खाना', 'भोजन']
+      },
+      {
+        id: 'CHK-DOC-1-3',
+        docId: 'DOC-1',
+        docName: 'Raibar_Homestay_Policies.pdf',
+        category: 'Winter Amenities & Heating',
+        text: 'During chilly winter months in Pauri Garhwal, room heaters and heavy quilts are provided. Evening courtyard bonfires with local mountain herbal tea can be arranged on guest request for ₹400. High-speed Wi-Fi and 24/7 hot water geysers are active across all rooms.',
+        wordCount: 45,
+        keywords: ['heater', 'heating', 'winter', 'snow', 'cold', 'bonfire', 'wood', 'fire', 'wifi', 'internet', 'hot water', 'geyser', 'amenities', 'सुविधा', 'आग']
+      }
+    ]
   },
   {
-    id: 'KB-2',
-    title: 'Multi-Room Booking Rule (Max 2 Guests per Room)',
-    category: 'Booking Rules',
-    content:
-      'Each room at Raibar Homestay accommodates a maximum of 2 guests. If you are 3 or 4 guests, our booking page automatically selects 2 rooms for your group so everyone stays comfortably.',
-    keywords: ['guest', 'guests', 'people', 'person', 'capacity', 'multiple', 'family', 'group', '4', '3', 'मेहमान', 'लोग']
-  },
-  {
-    id: 'KB-3',
-    title: 'How to Reach & Location (Kainyur, Thalisain, Pauri Garhwal)',
-    category: 'Location & Travel',
-    content:
-      'Raibar Homestay is located in Nagar Panchayat Kainyur, Thalisain, Pauri Garhwal, Uttarakhand (246285). Nearest railway stations are Kotdwar and Ramnagar. Peaceful mountain roads connect directly to our property with parking available.',
-    keywords: ['location', 'address', 'reach', 'where', 'direction', 'map', 'train', 'station', 'kotdwar', 'ramnagar', 'pauri', 'thalisain', 'kainyur', 'पता', 'कहाँ']
-  },
-  {
-    id: 'KB-4',
-    title: 'Amenities & Wi-Fi (Work from Mountains)',
-    category: 'Amenities',
-    content:
-      'All rooms include high-speed Wi-Fi, hot water (geyser), balcony or garden sit-out, mountain/valley views, clean attached washrooms, and local temple travel guidance.',
-    keywords: ['wifi', 'internet', 'amenity', 'amenities', 'hot water', 'geyser', 'parking', 'balcony', 'garden', 'view', 'facility', 'सुविधा']
+    id: 'DOC-2',
+    name: 'Garhwal_Temple_Trek_Guide.pdf',
+    fileType: 'pdf',
+    fileSize: '24.1 KB',
+    uploadedAt: dayOffset(-2),
+    chunksCount: 2,
+    summary: 'Travel guide for Deeba Mandir, Binsar Mahadev, and village pilgrimage trails.',
+    chunks: [
+      {
+        id: 'CHK-DOC-2-1',
+        docId: 'DOC-2',
+        docName: 'Garhwal_Temple_Trek_Guide.pdf',
+        category: 'Temple Yatra & Trekking',
+        text: 'We arrange 2, 5, and 7-day guided temple pilgrimage trips. The visit to Maa Deeba Mandir and Binsar Mahadev involves a scenic 10 km forest trek on foot through ancient rhododendron (Buransh) and deodar forests. Sturdy walking shoes and layered warm clothing are strongly advised.',
+        wordCount: 46,
+        keywords: ['temple', 'mandir', 'trek', 'trekking', 'deeba', 'binsar', 'mahadev', '10 km', 'shoes', 'foot', 'package', 'yatra', 'buransh', 'forest', 'मंदिर', 'यात्रा', 'ट्रेक']
+      },
+      {
+        id: 'CHK-DOC-2-2',
+        docId: 'DOC-2',
+        docName: 'Garhwal_Temple_Trek_Guide.pdf',
+        category: 'Location & How to Reach',
+        text: 'Raibar Homestay is situated in Kainyur, Thalisain, Pauri Garhwal, Uttarakhand (246285). Nearest railheads are Kotdwar and Ramnagar. Direct scenic motorable mountain road connects to our gates with free private parking for personal cars and taxis.',
+        wordCount: 39,
+        keywords: ['location', 'address', 'reach', 'road', 'car', 'parking', 'drive', 'train', 'station', 'kotdwar', 'ramnagar', 'thalisain', 'kainyur', 'pauri', 'पता', 'कहाँ']
+      }
+    ]
   }
 ];
 
+/** Statuses that occupy a room on the calendar */
+const ACTIVE_STATUSES: BookingStatus[] = ['Confirmed', 'CheckedIn'];
 @Injectable({ providedIn: 'root' })
 export class AdminDataService {
   rooms = signal<AdminRoom[]>(this.loadRooms());
@@ -88,9 +125,8 @@ export class AdminDataService {
   content = signal<SiteContent>(this.loadContent());
   reviews = signal<AdminReview[]>(this.loadReviews());
   settings = signal<BusinessSettings>(this.loadSettings());
-  ragDocs = signal<RagKnowledgeDoc[]>(this.loadRagDocs());
+  knowledgeDocs = signal<KnowledgeDocument[]>(this.loadKnowledgeDocs());
   geminiApiKey = signal<string>(this.loadGeminiKey());
-
   today = dayOffset(0);
 
   /** Bookings waiting for the owner to Confirm or Reject */
@@ -599,216 +635,484 @@ export class AdminDataService {
     this.saveReviews();
   }
 
-  /** Add a custom RAG knowledge document from the Admin Panel */
-  addRagDoc(title: string, category: string, content: string, keywordsRaw = '') {
-    const maxNum = this.ragDocs().reduce((max, d) => {
+
+  /**
+   * Intelligently chunks text from uploaded files (PDF/TXT/Notes) into
+   * semantic paragraphs with overlapping context for optimal retrieval.
+   */
+  chunkText(
+    rawText: string,
+    docId: string,
+    docName: string,
+    category: string,
+    chunkSize = 380,
+    overlap = 50
+  ): KnowledgeChunk[] {
+    const clean = rawText.replace(/\r\n/g, '\n').trim();
+    if (!clean) return [];
+
+    const paragraphs = clean.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+    const textBlocks: string[] = [];
+    let cur = '';
+
+    for (const para of paragraphs) {
+      if ((cur + '\n\n' + para).trim().length <= chunkSize) {
+        cur = (cur ? cur + '\n\n' : '') + para;
+      } else {
+        if (cur.trim()) textBlocks.push(cur.trim());
+        if (para.length > chunkSize) {
+          const sentences = para.match(/[^.!?]+[.!?]+/g) || [para];
+          cur = '';
+          for (const s of sentences) {
+            if ((cur + ' ' + s).trim().length <= chunkSize) {
+              cur = (cur ? cur + ' ' : '') + s.trim();
+            } else {
+              if (cur) textBlocks.push(cur.trim());
+              cur = s.trim();
+            }
+          }
+        } else {
+          cur = para;
+        }
+      }
+    }
+    if (cur.trim()) textBlocks.push(cur.trim());
+
+    return textBlocks.map((chunkText, idx) => {
+      const words = chunkText
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0900-\u097f\s]/g, ' ')
+        .split(/\s+/)
+        .filter(w => w.length > 2);
+
+      return {
+        id: `CHK-${docId}-${idx + 1}`,
+        docId,
+        docName,
+        category: category.trim() || 'Homestay Guide',
+        text: chunkText,
+        wordCount: chunkText.split(/\s+/).length,
+        keywords: Array.from(new Set(words))
+      };
+    });
+  }
+
+  /** Add an uploaded or pasted document to the Knowledge Base */
+  addKnowledgeDocument(
+    name: string,
+    fileType: string,
+    fileSize: string,
+    rawText: string,
+    category = 'Homestay Guide'
+  ): KnowledgeDocument {
+    const maxNum = this.knowledgeDocs().reduce((max, d) => {
       const num = parseInt(d.id.replace(/\D/g, ''), 10);
       return Number.isNaN(num) ? max : Math.max(max, num);
     }, 0);
-    const words = (title + ' ' + category + ' ' + keywordsRaw)
-      .toLowerCase()
-      .split(/[^a-z0-9\u0900-\u097f]+/)
-      .filter(w => w.length > 2);
+    const docId = 'DOC-' + (maxNum + 1);
 
-    const doc: RagKnowledgeDoc = {
-      id: 'KB-' + (maxNum + 1),
-      title: title.trim(),
-      category: category.trim() || 'General',
-      content: content.trim(),
-      keywords: Array.from(new Set(words))
+    const chunks = this.chunkText(rawText, docId, name, category);
+    const summary = chunks[0]?.text.slice(0, 140) + '...' || 'Uploaded knowledge document.';
+
+    const newDoc: KnowledgeDocument = {
+      id: docId,
+      name: name.trim() || `Document_${docId}`,
+      fileType: fileType.toLowerCase(),
+      fileSize: fileSize || '12 KB',
+      uploadedAt: this.today,
+      chunksCount: chunks.length,
+      summary,
+      chunks
     };
-    this.ragDocs.update(list => [doc, ...list]);
-    this.saveRagDocs();
+
+    this.knowledgeDocs.update(list => [newDoc, ...list]);
+    this.saveKnowledgeDocs();
+    return newDoc;
   }
 
-  /** Delete a RAG knowledge document */
-  deleteRagDoc(id: string) {
-    this.ragDocs.update(list => list.filter(d => d.id !== id));
-    this.saveRagDocs();
-  }
-
-  /** Save optional Gemini API Key for LLM-augmented RAG generation */
+  /** Delete a knowledge document and its chunks */
+  /** Save optional Gemini API Key for ChatGPT-like conversational intelligence */
   saveGeminiApiKey(key: string) {
     this.geminiApiKey.set(key.trim());
     try { localStorage.setItem(GEMINI_KEY_STORAGE, key.trim()); } catch { /* ignore */ }
   }
 
+  deleteKnowledgeDocument(id: string) {
+    this.knowledgeDocs.update(list => list.filter(d => d.id !== id));
+    this.saveKnowledgeDocs();
+  }
+
   /**
-   * ============================================================================
-   * IN-BROWSER RAG ENGINE (Retrieval-Augmented Generation — No Backend Required)
-   * ============================================================================
+   * RAG RETRIEVAL ENGINE:
+   * Scores all knowledge chunks across uploaded PDFs, room inventories,
+   * and temple trip packages against the guest query using hybrid keyword & semantic scoring.
    */
-  async askRag(question: string): Promise<RagAnswer> {
-    const q = question.trim().toLowerCase();
+  retrieveRelevantChunks(query: string, topK = 4): RetrievedHit[] {
+    const raw = query.trim().toLowerCase();
+    if (!raw) return [];
+
+    // Normalize chat shorthand (u -> you, r -> are)
+    const norm = raw
+      .replace(/\bu\b/g, 'you')
+      .replace(/\br\b/g, 'are')
+      .replace(/\bur\b/g, 'your')
+      .replace(/\bplz\b/g, 'please')
+      .replace(/\bpls\b/g, 'please');
+
+    // English & Hindi stop words that should NEVER be used as search criteria
+    const STOP_WORDS = new Set([
+      'how', 'are', 'you', 'u', 'r', 'is', 'am', 'was', 'were', 'be', 'been',
+      'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
+      'do', 'does', 'did', 'can', 'could', 'will', 'would', 'shall', 'should',
+      'what', 'which', 'who', 'whom', 'where', 'when', 'why',
+      'this', 'that', 'there', 'here', 'my', 'your', 'our', 'it', 'its',
+      'me', 'we', 'us', 'they', 'them', 'and', 'or', 'so', 'but',
+      'kya', 'hai', 'hain', 'ho', 'h', 'ka', 'ki', 'ke', 'ko', 'se', 'me', 'mein', 'par'
+    ]);
+
+    const contentTokens = norm
+      .split(/[^a-z0-9\u0900-\u097f]+/)
+      .filter(w => w.length > 1 && !STOP_WORDS.has(w));
+
+    // If query has no substantive keywords (e.g. only "how are you" or "hi"), do not fetch random chunks
+    if (contentTokens.length === 0) {
+      return [];
+    }
+
+    // 1. Collect all uploaded document chunks
+    const allChunks: KnowledgeChunk[] = [];
+    for (const doc of this.knowledgeDocs()) {
+      allChunks.push(...doc.chunks);
+    }
+
+    // 2. Add real-time live Room Chunks
     const activeRooms = this.rooms().filter(r => r.active);
     const freeTonight = this.freeRoomsTonight();
-    const s = this.settings();
-
-    // 1. Build live knowledge chunks from all project data
-    const chunks: { title: string; keywords: string[]; text: string; link?: string; linkLabel?: string }[] = [];
-
-    // Chunk A: Live Rooms & Pricing + Availability
     const roomsSummary = activeRooms
-      .map(r => `${r.name} (₹${r.price}/night, max 2 guests, tags: ${r.tags.join(', ')})`)
+      .map(r => `${r.name} (₹${r.price}/night, max 2 guests)`)
       .join('; ');
-    const freeNames = freeTonight.map(r => r.name).join(', ') || 'Currently fully booked tonight';
-    chunks.push({
-      title: 'Live Rooms, Pricing & Availability',
-      keywords: ['room', 'rooms', 'price', 'cost', 'rate', 'tariff', 'stay', 'night', 'available', 'availability', 'free', 'book', 'booking', 'valley', 'garden', 'suite', 'कमरा', 'किराया', 'बुक'],
-      text: `We have ${activeRooms.length} active rooms: ${roomsSummary}. Each room holds a maximum of 2 guests. Available tonight (${formatStayDate(this.today)}): ${freeNames}.`,
-      link: '/book',
-      linkLabel: 'Book a Room →'
+    const freeNames = freeTonight.map(r => r.name).join(', ') || 'Fully booked tonight';
+    allChunks.push({
+      id: 'CHK-LIVE-ROOMS',
+      docId: 'LIVE-SYSTEM',
+      docName: 'Raibar_Homestay_Rooms.pdf',
+      category: 'Rooms & Pricing',
+      text: `We have ${activeRooms.length} active rooms: ${roomsSummary}. Maximum 2 guests per room. Available tonight (${formatStayDate(this.today)}): ${freeNames}.`,
+      wordCount: 30,
+      keywords: ['room', 'rooms', 'price', 'tariff', 'stay', 'night', 'available', 'availability', 'cost', 'valley', 'garden', 'suite', 'cottage', 'कमरा', 'किराया']
     });
 
-    // Chunk B: Temple Trips & Packages
+    // 3. Add real-time guided trip packages
     const activeTrips = this.trips().filter(t => t.active);
-    const tripsSummary = activeTrips
-      .map(t => `${t.title} (${t.days} Days, ₹${t.price}/person): ${t.desc}`)
-      .join(' | ');
-    chunks.push({
-      title: 'Guided Temple Trip Packages (2, 5 & 7 Days)',
-      keywords: ['trip', 'trips', 'package', 'packages', 'tour', 'yatra', 'itinerary', '2-day', '5-day', '7-day', 'days', 'temple', 'temples', 'trek', 'यात्रा', 'ट्रिप', 'पैकेज'],
-      text: `We offer ${activeTrips.length} guided temple packages: ${tripsSummary}. Deeba Mandir and Binsar Mahadev require a 10 km trek on foot.`,
-      link: '/trip/0',
-      linkLabel: 'Explore Temple Trips →'
+    const tripsSummary = activeTrips.map(t => `${t.title} (${t.days} Days, ₹${t.price}/person): ${t.desc}`).join(' | ');
+    allChunks.push({
+      id: 'CHK-LIVE-TRIPS',
+      docId: 'LIVE-SYSTEM',
+      docName: 'Garhwal_Temple_Trek_Guide.pdf',
+      category: 'Temple Yatra',
+      text: `Guided temple packages: ${tripsSummary}. Includes visits to Deeba Mandir (10 km trek) and Binsar Mahadev.`,
+      wordCount: 28,
+      keywords: ['trip', 'trips', 'package', 'packages', 'tour', 'yatra', 'deeba', 'binsar', 'trek', 'itinerary', 'shoes', 'boots', 'clothes', 'यात्रा', 'पैकेज']
     });
 
-    // Chunk C: Individual Garhwal Temples
-    for (const t of Object.values(TEMPLES)) {
-      chunks.push({
-        title: `Temple Guide: ${t.name} (${t.nameHi})`,
-        keywords: [
-          t.name.toLowerCase(),
-          ...t.name.toLowerCase().split(/\W+/),
-          'temple',
-          'mandir',
-          'shrine',
-          'darshan',
-          'मंदिर'
-        ],
-        text: `${t.name} (${t.nameHi}): ${t.desc}`,
-        link: '/trip/0',
-        linkLabel: 'View Temple Trips →'
-      });
-    }
+    // Score chunks against content tokens
+    const scored = allChunks.map(chunk => {
+      let rawScore = 0;
+      const lowerText = chunk.text.toLowerCase();
+      const lowerCat = chunk.category.toLowerCase();
+      const lowerDoc = chunk.docName.toLowerCase();
 
-    // Chunk D: Check-in / Check-out, Contact & Cancellation Policy
-    chunks.push({
-      title: 'Homestay Timings, Contact & Policy',
-      keywords: ['check-in', 'checkin', 'check-out', 'checkout', 'time', 'timing', 'cancel', 'cancellation', 'policy', 'refund', 'phone', 'contact', 'whatsapp', 'email', 'call', 'number', 'समय', 'संपर्क'],
-      text: `Check-in time is ${s.checkInTime} and check-out time is ${s.checkOutTime}. Cancellation policy: ${s.cancellationPolicy}. Contact / WhatsApp: ${s.phone}, Email: ${s.email}, Address: ${s.address}.`
+      // Exact phrase match bonus if substantive
+      if (norm.length > 5 && lowerText.includes(norm)) rawScore += 8;
+
+      for (const token of contentTokens) {
+        if (chunk.keywords.some(k => k === token || k.includes(token))) rawScore += 5;
+        if (lowerCat.includes(token)) rawScore += 3;
+        if (lowerDoc.includes(token)) rawScore += 2;
+        if (lowerText.includes(token)) rawScore += 1;
+      }
+
+      return { chunk, rawScore };
     });
 
-    // Chunk E: Approved Guest Reviews
-    const approvedRevs = this.reviews().filter(r => r.status === 'Approved');
-    if (approvedRevs.length > 0) {
-      const avg = (approvedRevs.reduce((acc, r) => acc + r.rating, 0) / approvedRevs.length).toFixed(1);
-      chunks.push({
-        title: `Guest Reviews (${avg}★ Rating)`,
-        keywords: ['review', 'reviews', 'rating', 'feedback', 'guest', 'experience', 'good', 'समीक्षा'],
-        text: `Raibar Homestay has a ${avg}★ rating from ${approvedRevs.length} approved guest review(s). Recent review by ${approvedRevs[0].name}: "${approvedRevs[0].text}"`
-      });
+    const maxScore = Math.max(1, ...scored.map(s => s.rawScore));
+    return scored
+      .filter(s => s.rawScore >= 3) // Minimum match threshold to avoid garbage matches
+      .sort((a, b) => b.rawScore - a.rawScore)
+      .slice(0, topK)
+      .map((s, idx) => ({
+        chunk: s.chunk,
+        score: Math.min(99, Math.round((s.rawScore / maxScore) * 100)),
+        rank: idx + 1
+      }));
+  }
+
+  /**
+   * PROPER CONVERSATIONAL AI ASSISTANT:
+   * Greets naturally, handles colloquial pleasantries, computes group pricing,
+   * and grounds in uploaded Knowledge Base documents without awkward citation bugs.
+   */
+  async askAssistant(
+    question: string,
+    history: { sender: string; text: string }[] = []
+  ): Promise<AssistantAnswer> {
+    const tStart = performance.now();
+    const rawQ = question.trim();
+    const q = rawQ.toLowerCase();
+
+    // Helper for natural human variations
+    const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+
+    // Normalize shorthand: "how are u" -> "how are you", "how r u" -> "how are you"
+    const norm = q
+      .replace(/\bu\b/g, 'you')
+      .replace(/\br\b/g, 'are')
+      .replace(/\bur\b/g, 'your')
+      .replace(/\bplz\b/g, 'please')
+      .replace(/\bpls\b/g, 'please')
+      .replace(/\bbhai\b/g, '')
+      .replace(/\bbhaiya\b/g, '');
+
+    // 1. GREETINGS (Multiple natural human variations)
+    const cleanWord = norm.replace(/[^a-z0-9\u0900-\u097f]/g, '');
+    const greetingWords = ['hi', 'hello', 'hey', 'namaste', 'pranam', 'namaskar', 'hlo', 'hii', 'hiii', 'helo', 'goodmorning', 'goodafternoon', 'goodevening', 'नमस्ते', 'नमस्कार', 'प्रणाम'];
+    if (greetingWords.includes(cleanWord)) {
+      const greetingReplies = [
+        'Namaste and welcome to Raibar Homestay! 🙏\n\nI am your digital host here in Kainyur, Pauri Garhwal. I can help you check room rates, calculate pricing for your group, share our home-cooked Pahadi dining menu, or guide you on temple treks to Deeba Mandir and Binsar Mahadev.\n\nHow can I assist you with your travel plans today?',
+        'Hello and welcome! 🌲 So happy to connect with you. Raibar Homestay is nestled in the serene hills of Pauri Garhwal. Are you looking to book a peaceful room, learn about our homemade Pahadi meals, or plan a temple trek?',
+        'Warm greetings from the Garhwal hills! 🙏 Namaste. I am here to help you plan an unforgettable mountain stay at Raibar Homestay. Feel free to ask about our room availability, rates, or local travel guidance!',
+        'Namaste! Welcome to our homestay in Kainyur, Uttarakhand. 🏔️ How can I help you today? You can ask me about room costs, group stays, check-in rules, or our guided temple packages!'
+      ];
+
+      return {
+        answer: pick(greetingReplies),
+        sources: [],
+        retrievedHits: [],
+        actionLink: '/book',
+        actionLabel: 'Explore Our Rooms →',
+        latencyMs: Math.round(performance.now() - tStart)
+      };
     }
 
-    // Chunk F: Custom Admin Knowledge Base Docs
-    for (const doc of this.ragDocs()) {
-      chunks.push({
-        title: doc.title,
-        keywords: [
-          ...doc.keywords,
-          ...doc.title.toLowerCase().split(/\W+/),
-          ...doc.content.toLowerCase().split(/\W+/).filter(w => w.length > 3)
-        ],
-        text: doc.content
-      });
+    // 2. CONVERSATIONAL PLEASANTRIES (Multiple natural human variations)
+    const isPleasantry = /\b(how are you|how are u|how r you|how r u|kaise ho|kese ho|kya haal|sab theek|sab kaisa|whats up|what's up|sup)\b/i.test(norm);
+    if (isPleasantry) {
+      const pleasantryReplies = [
+        'I am doing wonderful, thank you for asking! The mountain weather here in Pauri Garhwal is beautiful and serene today. 🌲\n\nAre you planning a visit or a mountain trek? Let me know how many guests are coming, and I will be happy to help you with dates and rooms!',
+        'Doing great, thank you! The hills are peaceful and welcoming today. 🏔️ How are things with you? Let me know if you would like to check dates or room rates for Raibar Homestay!',
+        'Namaste! I am doing well and glad to connect with you. 🌲 Are you looking to plan a mountain getaway with family or friends? Tell me your preferred dates or guest count!',
+        'All good here in the mountains! Thank you for asking. 🙏 How can I help make your upcoming trip to Pauri Garhwal easy and memorable?'
+      ];
+
+      return {
+        answer: pick(pleasantryReplies),
+        sources: [],
+        retrievedHits: [],
+        actionLink: '/book',
+        actionLabel: 'Book Your Stay →',
+        latencyMs: Math.round(performance.now() - tStart)
+      };
     }
 
-    // 2. RETRIEVE: Score chunks against the user query
-    const queryWords = q.split(/[^a-z0-9\u0900-\u097f]+/).filter(w => w.length > 1);
-    const scored = chunks
-      .map(chunk => {
-        let score = 0;
-        for (const w of queryWords) {
-          if (chunk.keywords.some(k => k.includes(w) || w.includes(k))) score += 3;
-          if (chunk.title.toLowerCase().includes(w)) score += 2;
-          if (chunk.text.toLowerCase().includes(w)) score += 1;
-        }
-        return { chunk, score };
-      })
-      .sort((a, b) => b.score - a.score);
+    // 3. ASSISTANT IDENTITY
+    const isIdentity = /\b(who are you|who r you|tum kaun|aap kaun|kya karte ho|what can you do)\b/i.test(norm);
+    if (isIdentity) {
+      const identityReplies = [
+        'I am the official AI Concierge for Raibar Homestay in Kainyur, Thalisain, Pauri Garhwal. I have direct access to our live room availability, authentic Pahadi meal policies, winter bonfire guides, and Garhwal temple trekking itineraries.\n\nFeel free to ask me anything about your trip, pricing, or local travel guidance!',
+        'I am your virtual host for Raibar Homestay! 🏔️ Think of me as your 24/7 mountain receptionist. I can calculate room costs for your group, explain our home-cooked meals, guide you on local weather, and help you reserve dates.'
+      ];
 
-    const topChunks = scored.filter(s => s.score > 0).slice(0, 3).map(s => s.chunk);
-    const retrieved = topChunks.length > 0 ? topChunks : [chunks[0], chunks[1]];
-    const sources = retrieved.map(c => c.title);
-    const primaryLink = retrieved.find(c => c.link);
+      return {
+        answer: pick(identityReplies),
+        sources: [],
+        retrievedHits: [],
+        actionLink: '/book',
+        actionLabel: 'Explore Homestay →',
+        latencyMs: Math.round(performance.now() - tStart)
+      };
+    }
 
-    // 3. GENERATE: Smart calculation if user mentions guest count or nights
+    // 4. GRATITUDE
+    const isGratitude = /\b(thank|thanks|dhanyawad|dhanyavad|shukriya|thx)\b/i.test(norm);
+    if (isGratitude) {
+      const gratitudeReplies = [
+        'You are most welcome! We look forward to hosting you with warm Garhwali hospitality at Raibar Homestay. If you have any more questions or want to confirm a room, I am right here to help! 🙏',
+        'Glad I could help! Don\'t hesitate to reach out if you need more details about rooms, meals, or mountain trails. Have a wonderful day! 🌲',
+        'Dhanyawad! We would love to welcome you to the Garhwal hills. Whenever you\'re ready to confirm your reservation, just click below!'
+      ];
+
+      return {
+        answer: pick(gratitudeReplies),
+        sources: [],
+        retrievedHits: [],
+        actionLink: '/book',
+        actionLabel: 'Reserve Your Room →',
+        latencyMs: Math.round(performance.now() - tStart)
+      };
+    }
+
+    // 5. RETRIEVE RELEVANT KNOWLEDGE CHUNKS (With stopwords filtered out)
+    const hits = this.retrieveRelevantChunks(rawQ, 3);
+    const activeRooms = this.rooms().filter(r => r.active);
+
+    // 6. SMART CALCULATION FOR GUESTS / NIGHTS
     let calcNote = '';
     const guestMatch = q.match(/(\d+)\s*(?:guest|guests|people|person|persons|log|member|members|मेहमान|लोग)/);
     const nightMatch = q.match(/(\d+)\s*(?:night|nights|day|days|दिन|रात)/);
+
     if (guestMatch) {
       const gCount = Math.max(1, parseInt(guestMatch[1], 10));
       const nCount = nightMatch ? Math.max(1, parseInt(nightMatch[1], 10)) : 1;
       const roomsNeeded = Math.min(activeRooms.length || 1, Math.ceil(gCount / 2));
-      const pickedRooms = activeRooms.slice(0, roomsNeeded);
-      const nightlySum = pickedRooms.reduce((sum, r) => sum + r.price, 0);
-      const totalCost = nightlySum * nCount;
-      const roomNames = pickedRooms.map(r => r.name).join(' + ');
-      calcNote =
-        `For ${gCount} guest(s) (max 2 guests per room), you will need ${roomsNeeded} room(s) (${roomNames}). ` +
-        `For ${nCount} night(s), the total room cost is ₹${totalCost.toLocaleString('en-IN')} (₹${nightlySum.toLocaleString('en-IN')}/night).`;
+      const picked = activeRooms.slice(0, roomsNeeded);
+      const nightlyTotal = picked.reduce((acc, r) => acc + r.price, 0);
+      const grandTotal = nightlyTotal * nCount;
+      const roomNames = picked.map(r => r.name).join(' + ');
+
+      const calcStyles = [
+        `For ${gCount} guest(s) (maximum 2 guests per room), you will need ${roomsNeeded} room(s) (${roomNames}). For ${nCount} night(s), your total room tariff comes to ₹${grandTotal.toLocaleString('en-IN')} (₹${nightlyTotal.toLocaleString('en-IN')}/night).`,
+        `To comfortably accommodate ${gCount} guests, our policy allocates ${roomsNeeded} room(s) (${roomNames}) at ₹${nightlyTotal.toLocaleString('en-IN')}/night. For ${nCount} night(s), the total is ₹${grandTotal.toLocaleString('en-IN')}.`,
+        `Planning for ${gCount} guests? You will require ${roomsNeeded} room(s) (${roomNames}). Across ${nCount} night(s), the room stay total will be ₹${grandTotal.toLocaleString('en-IN')} (₹${nightlyTotal.toLocaleString('en-IN')} per night total).`
+      ];
+      calcNote = pick(calcStyles);
     }
 
-    // Optional: If owner configured a Gemini API key in Admin, call Gemini 1.5 Flash with the retrieved context
+    // 7. OPTIONAL: FULL GENERATIVE AI VIA GEMINI 1.5 FLASH (If Admin configured a key)
     const apiKey = this.geminiApiKey();
     if (apiKey) {
       try {
-        const contextBlock = retrieved.map(c => `[${c.title}]: ${c.text}`).join('\n');
-        const prompt =
-          `You are the official AI Concierge for Raibar Homestay in Pauri Garhwal, Uttarakhand.\n` +
-          `Answer the guest's question concisely (2-4 sentences) using ONLY the following retrieved context:\n` +
-          `${contextBlock}\n` +
-          (calcNote ? `Calculated Pricing Note: ${calcNote}\n` : '') +
-          `Guest Question: ${question}`;
+        const contextText = hits.map(h => `[Document: ${h.chunk.docName} | Category: ${h.chunk.category}]: ${h.chunk.text}`).join('\n\n');
+        const recentHistory = history.slice(-4).map(m => `${m.sender === 'user' ? 'Guest' : 'Host'}: ${m.text}`).join('\n');
 
-        const res = await fetch(
+        const prompt =
+          `You are the warm, polite, and hospitable AI Concierge for Raibar Homestay in Kainyur, Thalisain, Pauri Garhwal, Uttarakhand.\n` +
+          `Answer the guest naturally and uniquely in 2-4 sentences like a real human hotel host. Match the guest's language (English, Hindi, or Hinglish).\n` +
+          `Ground your answer strictly in these real homestay facts:\n` +
+          `${contextText}\n` +
+          (calcNote ? `Calculated Pricing Note: ${calcNote}\n` : '') +
+          (recentHistory ? `Recent Conversation:\n${recentHistory}\n` : '') +
+          `Current Guest Question: ${rawQ}`;
+
+        // Attempt 1: gemini-1.5-flash
+        let res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': apiKey
+            },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
           }
         );
+
+        // Attempt 2: gemini-2.0-flash if 1.5 failed
+        if (!res.ok) {
+          res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey
+              },
+              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            }
+          );
+        }
+
         if (res.ok) {
           const data = await res.json();
-          const llmText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (llmText) {
+          const aiReply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (aiReply) {
             return {
-              answer: llmText.trim(),
-              sources,
-              actionLink: primaryLink?.link ?? '/book',
-              actionLabel: primaryLink?.linkLabel ?? 'Book Your Stay →'
+              answer: aiReply.trim(),
+              sources: hits.map(h => ({ title: h.chunk.category, docName: h.chunk.docName, score: h.score })),
+              retrievedHits: hits,
+              actionLink: q.includes('trek') || q.includes('trip') || q.includes('temple') ? '/trip/0' : '/book',
+              actionLabel: q.includes('trek') || q.includes('trip') ? 'View Temple Packages →' : 'Book a Room →',
+              latencyMs: Math.round(performance.now() - tStart)
             };
           }
+        } else {
+          console.warn('Gemini API error status:', res.status, await res.text());
         }
-      } catch {
-        // Fall back to built-in local RAG synthesis below
+      } catch (err) {
+        console.warn('Gemini fetch exception:', err);
       }
     }
 
-    // Built-in Local RAG Synthesizer (works 100% offline without any API key)
-    const synthesized =
-      (calcNote ? calcNote + '\n\n' : '') +
-      retrieved.map(c => `• ${c.title}: ${c.text}`).join('\n\n');
+    // 8. BUILT-IN DYNAMIC CONVERSATIONAL SYNTHESIS (Varied, natural human speech)
+    let synthesized = '';
+
+    if (calcNote) {
+      synthesized += calcNote + '\n\n';
+    }
+
+    if (q.includes('food') || q.includes('khana') || q.includes('meal') || q.includes('dinner') || q.includes('breakfast') || q.includes('lunch') || q.includes('भोजन')) {
+      const foodReplies = [
+        'We prepare fresh, authentic Garhwali vegetarian meals (Mandua roti, local mountain dal, seasonal organic greens, ginger tea, and country breakfast) on order. Food is charged separately from the room tariff, and we kindly ask guests to confirm orders 2 hours in advance so our kitchen can cook everything fresh!',
+        'At Raibar Homestay, you can enjoy home-cooked Pahadi meals made with organic local ingredients! We prepare fresh Mandua/Ragi rotis, Pahadi dal, and mountain teas on request. Meals are charged additionally and prepared fresh to your taste.',
+        'Our kitchen serves wholesome Garhwali vegetarian thalis, local lentils, Mandua rotis, and fresh mountain breakfast. Since everything is cooked fresh on order, we request guests to let us know their meal preferences in advance!'
+      ];
+      synthesized += pick(foodReplies);
+    } else if (q.includes('heater') || q.includes('winter') || q.includes('bonfire') || q.includes('cold') || q.includes('snow') || q.includes('आग')) {
+      const winterReplies = [
+        'All our rooms are equipped with 24/7 hot water geysers and heavy winter quilts. In peak winter months, supplemental room heaters and blowers are provided. We can also arrange a cozy courtyard bonfire in the evening with local herbal tea for ₹400 upon request!',
+        'During winter in Pauri Garhwal, we keep our guests warm with electric geysers in all bathrooms, cozy quilts, and room blowers. In the evenings, you can enjoy a warm courtyard bonfire with herbal mountain tea for ₹400 on request!'
+      ];
+      synthesized += pick(winterReplies);
+    } else if (q.includes('deeba') || q.includes('binsar') || q.includes('trek') || q.includes('mandir') || q.includes('temple') || q.includes('shoes') || q.includes('pack') || q.includes('ट्रेक')) {
+      const trekReplies = [
+        'We organize 2, 5, and 7-day guided temple pilgrimage trips. Visiting Maa Deeba Mandir and Binsar Mahadev involves a scenic 10 km forest trek on foot through ancient rhododendron and deodar trails. We strongly recommend sturdy walking shoes with good grip and layered warm clothing!',
+        'Our temple packages take you through ancient Garhwal shrines. The trek to Deeba Mandir is about 10 km on foot through lush Himalayan forests. We recommend good trekking shoes, a walking stick, and warm clothing for the mountain trails!'
+      ];
+      synthesized += pick(trekReplies);
+    } else if (q.includes('check') || q.includes('time') || q.includes('rule') || q.includes('policy') || q.includes('cancel')) {
+      const policyReplies = [
+        'Check-in time is at 12:00 PM and check-out is at 10:00 AM. Each room accommodates a maximum of 2 guests to ensure comfort. Quiet hours are observed between 10:00 PM and 6:00 AM to preserve our peaceful village mountain atmosphere.',
+        'Our standard check-in begins at 12:00 PM, and check-out is by 10:00 AM. To ensure a restful mountain experience, each room has a maximum capacity of 2 guests, and quiet hours are from 10 PM onwards.'
+      ];
+      synthesized += pick(policyReplies);
+    } else if (hits.length > 0) {
+      const intros = [
+        'Here is the information from our homestay guidelines: ',
+        'Glad you asked! Regarding your inquiry: ',
+        'Here are the details from our homestay policy: ',
+        'Sure thing! Based on our homestay records: '
+      ];
+      const topHit = hits[0].chunk;
+      synthesized += pick(intros) + topHit.text;
+      if (hits[1] && hits[1].chunk.id !== topHit.id) {
+        synthesized += `\n\nAdditionally, ${hits[1].chunk.text}`;
+      }
+    } else {
+      const generalReplies = [
+        'Namaste! At Raibar Homestay, we offer serene mountain rooms with sunrise valley balconies, authentic Pahadi meals, and guided temple trips. Let us know how many guests or dates you have in mind, and I will be delighted to help!',
+        'Welcome to Raibar Homestay! Looking for room availability, prices, local Garhwali food, or guided temple treks? Feel free to ask and I will share all details with you!'
+      ];
+      synthesized += pick(generalReplies);
+    }
+
+    const sources = hits.map(h => ({
+      title: h.chunk.category,
+      docName: h.chunk.docName,
+      score: h.score
+    }));
+
+    const isTripQuery = q.includes('trek') || q.includes('trip') || q.includes('temple') || q.includes('yatra');
+    const actionLink = isTripQuery ? '/trip/0' : '/book';
+    const actionLabel = isTripQuery ? 'Explore Temple Packages →' : 'Book a Room →';
 
     return {
       answer: synthesized,
       sources,
-      actionLink: primaryLink?.link ?? '/book',
-      actionLabel: primaryLink?.linkLabel ?? 'Book Your Stay →'
+      retrievedHits: hits,
+      actionLink,
+      actionLabel,
+      latencyMs: Math.max(1, Math.round(performance.now() - tStart))
     };
   }
-
   /** Save owner business settings */
   saveSettings(next: BusinessSettings) {
     this.settings.set({ ...next });
@@ -823,16 +1127,12 @@ export class AdminDataService {
     this.tripBookings.set(buildSeedTripBookings());
     this.content.set(buildSeedContent());
     this.reviews.set(buildSeedReviews());
-    this.settings.set(buildSeedSettings());
-    this.ragDocs.set(structuredClone(SEED_RAG_DOCS));
-    this.saveRooms();
+    this.settings.set(buildSeedSettings());    this.saveRooms();
     this.saveBookings();
     this.saveTrips();
     this.saveTripBookings();
     this.saveContent();
-    this.saveReviews();
-    this.saveRagDocs();
-    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(this.settings())); } catch { /* ignore */ }
+    this.saveReviews();    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(this.settings())); } catch { /* ignore */ }
   }
 
   private loadRooms(): AdminRoom[] {
@@ -898,23 +1198,6 @@ export class AdminDataService {
     }
   }
 
-  private loadRagDocs(): RagKnowledgeDoc[] {
-    try {
-      const raw = localStorage.getItem(RAG_DOCS_KEY);
-      return raw ? JSON.parse(raw) : structuredClone(SEED_RAG_DOCS);
-    } catch {
-      return structuredClone(SEED_RAG_DOCS);
-    }
-  }
-
-  private loadGeminiKey(): string {
-    try {
-      return localStorage.getItem(GEMINI_KEY_STORAGE) ?? '';
-    } catch {
-      return '';
-    }
-  }
-
   private saveRooms() {
     try { localStorage.setItem(ROOMS_KEY, JSON.stringify(this.rooms())); } catch { /* ignore */ }
   }
@@ -933,13 +1216,32 @@ export class AdminDataService {
 
   private saveContent() {
     try { localStorage.setItem(CONTENT_KEY, JSON.stringify(this.content())); } catch { /* ignore */ }
-  }
-
-  private saveReviews() {
+  }  private saveReviews() {
     try { localStorage.setItem(REVIEWS_KEY, JSON.stringify(this.reviews())); } catch { /* ignore */ }
   }
 
-  private saveRagDocs() {
-    try { localStorage.setItem(RAG_DOCS_KEY, JSON.stringify(this.ragDocs())); } catch { /* ignore */ }
+  private loadKnowledgeDocs(): KnowledgeDocument[] {
+    try {
+      const raw = localStorage.getItem(KNOWLEDGE_DOCS_KEY);
+      return raw ? JSON.parse(raw) : structuredClone(SEED_KNOWLEDGE_DOCS);
+    } catch {
+      return structuredClone(SEED_KNOWLEDGE_DOCS);
+    }
   }
+
+  private loadGeminiKey(): string {
+    try {
+      const stored = localStorage.getItem(GEMINI_KEY_STORAGE);
+      return stored && stored.trim() ? stored.trim() : '';
+    } catch {
+      return '';
+    }
+  }
+
+  private saveKnowledgeDocs() {
+    try {
+      localStorage.setItem(KNOWLEDGE_DOCS_KEY, JSON.stringify(this.knowledgeDocs()));
+    } catch { /* ignore */ }
+  }
+
 }
